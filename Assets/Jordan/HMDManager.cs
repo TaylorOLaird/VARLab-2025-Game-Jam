@@ -12,12 +12,15 @@ public class HMDManager : MonoBehaviour
         if (mainCamera != null)
         {
             HMDhitbox.transform.parent = mainCamera.transform;
+            HMDhitbox.transform.localPosition = Vector3.zero;
         }
         else
         {
             Debug.LogWarning("Main Camera not found in the scene.");
         }
     }
+
+
 
     void Update()
     {
