@@ -8,17 +8,17 @@ public class WaterManager : MonoBehaviour
     public void EnableWater()
     {
         waterPlane.SetActive(true);
-        //RenderSettings.fog = true;
-        //RenderSettings.fogMode = FogMode.ExponentialSquared;
-        //RenderSettings.fogColor = new Color(0.0f, 0.4f, 0.7f); 
-        //RenderSettings.fogDensity = 0.05f; 
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.ExponentialSquared;
+        RenderSettings.fogColor = new Color(0.0f, 0.4f, 0.7f);
+        RenderSettings.fogDensity = 0.05f;
         WaterSceneState.isWaterEnabled = true;
     }
 
     public void DisableWater()
     {
         waterPlane.SetActive(false);
-      //  RenderSettings.fog = false;
+        RenderSettings.fog = false;
         WaterSceneState.isWaterEnabled = false;
     }
 
