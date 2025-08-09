@@ -461,6 +461,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SimulateHMDOn",
+                    "type": "Button",
+                    "id": "4c637496-dcb3-41e3-bea8-a497a3085654",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SimulateHMDOff",
+                    "type": "Button",
+                    "id": "d56c24a8-03fd-4906-904f-75f8b9d195ed",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -714,6 +732,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "LeftMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e9103024-b078-491c-891c-8efa7eaa65d1",
+                    "path": "<XRController>{LeftHand}/{PrimaryButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SimulateHMDOn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bbfc627f-f924-475f-95d1-0061d068b29b",
+                    "path": "<XRController>{LeftHand}/{SecondaryButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SimulateHMDOff",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
