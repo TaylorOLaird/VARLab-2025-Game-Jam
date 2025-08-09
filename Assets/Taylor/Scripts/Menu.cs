@@ -49,7 +49,7 @@ public class Menu : MonoBehaviour
 
     }
 
-    public void addHeadset(InputAction.CallbackContext context)
+    public void addHeadset(HMD headset)
     {
         if (headsetIndex < headsetImages.Count)
         {
@@ -58,7 +58,7 @@ public class Menu : MonoBehaviour
         }
     }
 
-    public void removeHeadset(InputAction.CallbackContext context)
+    public void removeHeadset(HMD headset)
     {
         if (headsetIndex > 0)
         {
