@@ -7,16 +7,13 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
-    guid: 55daccc09a3b69647bbab145b54a3ab3
-  - enabled: 1
+    guid: 17f8f9377dd1a3e41a8c2cbb8e8a4f0a
+  - enabled: 0
     path: Assets/Scenes/Taylor.unity
     guid: 4beae438ef515c6489c8d651318d1ef1
   - enabled: 1
-    path: Assets/Berk/Scenes/SampleScene.unity
-    guid: b61d8110fdb6baf4685d3dc20c818e43
-  - enabled: 1
-    path: Assets/Berk/Scenes/MiniScene1.unity
-    guid: 79aaea58f5d4de74490cb4dc8ae07b87
+    path: Assets/Jordan/Scenes/HMD.unity
+    guid: d09b47c8332e8de439faced2801b6e3f
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 7572ab5ab4711364c92aeaca72ddffc2, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}

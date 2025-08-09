@@ -143,6 +143,7 @@ MonoBehaviour:
   - {fileID: -6964385104728420655}
   - {fileID: 8054565280916438606}
   - {fileID: -2776051142815902953}
+  - {fileID: 4924455587710505090}
   - {fileID: 7868573866317014298}
   - {fileID: -8369286794541019510}
   - {fileID: 2172481460014292222}
@@ -152,6 +153,9 @@ MonoBehaviour:
   - {fileID: -4132766057310925390}
   - {fileID: 2730096442025903730}
   m_renderMode: 1
+  m_autoColorSubmissionMode: 1
+  m_colorSubmissionModes:
+    m_List: 00000000
   m_depthSubmissionMode: 0
   m_optimizeBufferDiscards: 1
   m_symmetricProjection: 0
@@ -192,6 +196,26 @@ MonoBehaviour:
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.hpreverb
   openxrExtensionStrings: XR_EXT_hp_mixed_reality_controller
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-5302525026177429271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7365b139f7aec43b23d26b7a48b5a6, type: 3}
+  m_Name: MetaQuestTouchPlusControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Meta Quest Touch Plus Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.metaquestplus
+  openxrExtensionStrings: XR_META_touch_controller_plus
   company: Unity
   priority: 0
   required: 0
@@ -662,6 +686,26 @@ MonoBehaviour:
   company: Unity
   priority: 0
   required: 0
+--- !u!114 &4924455587710505090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7365b139f7aec43b23d26b7a48b5a6, type: 3}
+  m_Name: MetaQuestTouchPlusControllerProfile Android
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Meta Quest Touch Plus Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.metaquestplus
+  openxrExtensionStrings: XR_META_touch_controller_plus
+  company: Unity
+  priority: 0
+  required: 0
 --- !u!114 &4953789238716485517
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -743,6 +787,7 @@ MonoBehaviour:
   - {fileID: -5768716044743774122}
   - {fileID: 453687221469669862}
   - {fileID: -7766217704549271549}
+  - {fileID: -5302525026177429271}
   - {fileID: 3764511392828511814}
   - {fileID: -7280764467716966064}
   - {fileID: 7172261938295586669}
@@ -753,6 +798,9 @@ MonoBehaviour:
   - {fileID: -811474279906638140}
   - {fileID: -2440957087940930623}
   m_renderMode: 1
+  m_autoColorSubmissionMode: 1
+  m_colorSubmissionModes:
+    m_List: 00000000
   m_depthSubmissionMode: 0
   m_optimizeBufferDiscards: 0
   m_symmetricProjection: 0
