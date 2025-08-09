@@ -13224,9 +13224,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d0054261e4ff7ff44a761e92ea429ecb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1882888000}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d0054261e4ff7ff44a761e92ea429ecb, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1882888002}
   m_SourcePrefab: {fileID: 100100000, guid: d0054261e4ff7ff44a761e92ea429ecb, type: 3}
 --- !u!1 &1882887993 stripped
 GameObject:
@@ -13409,25 +13406,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1882888002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1882887993}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e003ad3d9a64104dbb21f32d8dd5fa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  headSocket: {fileID: 721338002}
-  grabInteractable: {fileID: 1882888000}
-  postProcessVolume: {fileID: 1452579720}
-  objectsToEnableOnWear: []
-  dimensionSceneName: MiniScene1
-  loadSceneAdditively: 1
-  unloadSceneOnUnwear: 1
 --- !u!1 &1887216938
 GameObject:
   m_ObjectHideFlags: 0
@@ -14719,6 +14697,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2060779777}
+  - component: {fileID: 2060779779}
   m_Layer: 0
   m_Name: Headset
   m_TagString: Untagged
@@ -14743,6 +14722,26 @@ Transform:
   - {fileID: 1723074967}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2060779779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2060779775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae93ba9f08c632b4785f293064b1ca2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  headSocket: {fileID: 721338002}
+  grabInteractable: {fileID: 1882888000}
+  postProcessVolume: {fileID: 1452579720}
+  objectsToEnableOnWear: []
+  dimensionSceneAsset: {fileID: 0}
+  dimensionSceneName: MiniScene1
+  loadSceneAdditively: 1
+  unloadSceneOnUnwear: 1
 --- !u!1 &2064529225
 GameObject:
   m_ObjectHideFlags: 0
