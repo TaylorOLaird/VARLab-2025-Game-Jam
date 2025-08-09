@@ -43,7 +43,7 @@ public class Menu : MonoBehaviour
 
     }
 
-    public void addHeadset()
+    public void addHeadset(GameObject headset)
     {
         if (headsetIndex < headsetImages.Count)
         {
@@ -52,7 +52,7 @@ public class Menu : MonoBehaviour
         }
     }
 
-    public void removeHeadset()
+    public void removeHeadset(GameObject headset)
     {
         if (headsetIndex > 0)
         {
