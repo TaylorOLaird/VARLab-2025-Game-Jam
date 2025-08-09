@@ -5,6 +5,7 @@ using UnityEngine;
 public class HMDManager : MonoBehaviour
 {
     public GameObject HMDhitbox;
+
     void Start()
     {
         // Find the main camera in the XR Origin rig
@@ -20,10 +21,18 @@ public class HMDManager : MonoBehaviour
         }
     }
 
-
-
     void Update()
     {
 
+    }
+
+    public void HandleHeadsetDon()
+    {
+        EventManager.HeadsetDon();
+    }
+
+    public void HandleHeadsetDoff()
+    {
+        EventManager.HeadsetDoff();
     }
 }
