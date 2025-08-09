@@ -3,9 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Tilemaps;
 
 public class BallBehavior : MonoBehaviour
 {
+    [SerializeField]BoardManager manager;
+
+    TileCheck tileCheck;
+
     Rigidbody ballRigidbody;
 
     Vector3 currentPosition;
@@ -19,11 +24,14 @@ public class BallBehavior : MonoBehaviour
     [SerializeField] float moveDirection;
 
     bool isMoving;
+
+    bool isInitialized;
     // Start is called before the first frame update
     void Start()
     {
         ballRigidbody = GetComponent<Rigidbody>();
         currentPosition = transform.position;
+        isInitialized = false;
 
     }
 
@@ -35,31 +43,32 @@ public class BallBehavior : MonoBehaviour
 
     void FixedUpdate()
     {
+        
         // Move direction 0 is to stay still
 
         // Forward
         if (moveDirection == 1)
         {
             float movementSpeed = -maxMoveSpeed / 10;
-            moveBall(movementSpeed , 0);
+            moveBall(movementSpeed, 0);
         }
         // Backwards
         else if (moveDirection == 2)
         {
             float movementSpeed = maxMoveSpeed / 10;
-            moveBall(movementSpeed , 0);
+            moveBall(movementSpeed, 0);
         }
         // Right
         else if (moveDirection == 3)
         {
             float movementSpeed = maxMoveSpeed / 10;
-            moveBall(0 , movementSpeed);
+            moveBall(0, movementSpeed);
         }
         // Left
         else if (moveDirection == 4)
         {
             float movementSpeed = -maxMoveSpeed / 10;
-            moveBall(0 , movementSpeed);
+            moveBall(0, movementSpeed);
         }
     }
 
@@ -110,6 +119,18 @@ public class BallBehavior : MonoBehaviour
         if (other.CompareTag("Floor"))
         {
             restPosition = new Vector3(other.transform.position.x, transform.position.y, other.transform.position.z);
+            if (!isInitialized)
+            {
+                transform.position = restPosition;
+                isInitialized = true;
+            }
+            tileCheck = other.GetComponent<TileCheck>();
+
+            if (tileCheck.getTileActive() == false)
+            {
+                manager.addTile();
+                tileCheck.setTileActive();
+            }
         }
     }
 
