@@ -146,7 +146,7 @@ public class LaserEmitterURP : MonoBehaviour
         {
             SetRingPerInstance(baseCol, ringEmission);
             _lastAppliedLaser = laser;
-        }
+    }
     }
 
     void ApplyLine(LineRenderer lr, float width, Vector3 a, Vector3 b, bool caps)
