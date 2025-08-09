@@ -6,13 +6,11 @@ using UnityEngine.InputSystem;
 public class Menu : MonoBehaviour
 {
     [SerializeField] private InputActionReference openMenuButton;
-    [SerializeField] private InputActionReference addHeadsetButton;
-    [SerializeField] private InputActionReference removeHeadsetButton;
     private bool isMenuOpen = false;
 
     [SerializeField] private GameObject menuUI;
     [SerializeField] private GameObject curve;
-    // list of headset images
+    
     [SerializeField] private List<GameObject> headsetImages;
     private int headsetIndex = 0;
 
@@ -36,11 +34,8 @@ public class Menu : MonoBehaviour
         openMenuButton.action.Enable();
         openMenuButton.action.performed += toggleMenu;
 
-        addHeadsetButton.action.Enable();
-        addHeadsetButton.action.performed += addHeadset;
-
-        removeHeadsetButton.action.Enable();
-        removeHeadsetButton.action.performed += removeHeadset;
+        EventManager.OnHeadsetDon += addHeadset;
+        EventManager.OnHeadsetDoff += removeHeadset;
     }
 
     void Update()
@@ -48,12 +43,7 @@ public class Menu : MonoBehaviour
 
     }
 
-    public void addHeadset(GameObject headset)
-    {
-
-    }
-
-    public void addHeadset(InputAction.CallbackContext context)
+    public void addHeadset()
     {
         if (headsetIndex < headsetImages.Count)
         {
@@ -62,7 +52,7 @@ public class Menu : MonoBehaviour
         }
     }
 
-    public void removeHeadset(InputAction.CallbackContext context)
+    public void removeHeadset()
     {
         if (headsetIndex > 0)
         {
