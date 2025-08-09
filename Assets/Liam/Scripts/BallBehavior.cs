@@ -10,6 +10,8 @@ public class BallBehavior : MonoBehaviour
 
     Vector3 currentPosition;
 
+    Vector3 restPosition;
+
     [Range(0f, 1.5f)]
     [SerializeField] float maxMoveSpeed;
 
@@ -102,8 +104,12 @@ public class BallBehavior : MonoBehaviour
         if (other.CompareTag("Wall"))
         {
             moveDirection = 0;
-            // moveBall(0, 0);
+            transform.position = restPosition;
             isMoving = false;
+        }
+        if (other.CompareTag("Floor"))
+        {
+            restPosition = new Vector3(other.transform.position.x, transform.position.y, other.transform.position.z);
         }
     }
 
