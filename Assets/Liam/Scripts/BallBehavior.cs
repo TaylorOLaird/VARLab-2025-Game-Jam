@@ -10,7 +10,7 @@ public class BallBehavior : MonoBehaviour
 
     Vector3 currentPosition;
 
-    [Range(0f, 5f)]
+    [Range(0f, 1.5f)]
     [SerializeField] float maxMoveSpeed;
 
     // Change back to private when done debugging
@@ -34,30 +34,30 @@ public class BallBehavior : MonoBehaviour
     void FixedUpdate()
     {
         // Move direction 0 is to stay still
-        
+
         // Forward
         if (moveDirection == 1)
         {
-            Vector3 moveTowards = new Vector3(currentPosition.x - (maxMoveSpeed / 10), currentPosition.y, currentPosition.z);
-            ballRigidbody.MovePosition(moveTowards);
+            float movementSpeed = -maxMoveSpeed / 10;
+            moveBall(movementSpeed , 0);
         }
         // Backwards
         else if (moveDirection == 2)
         {
-            Vector3 moveTowards = new Vector3(currentPosition.x + (maxMoveSpeed / 10), currentPosition.y, currentPosition.z);
-            ballRigidbody.MovePosition(moveTowards);
+            float movementSpeed = maxMoveSpeed / 10;
+            moveBall(movementSpeed , 0);
         }
         // Right
         else if (moveDirection == 3)
         {
-            Vector3 moveTowards = new Vector3(currentPosition.x, currentPosition.y, currentPosition.z + (maxMoveSpeed / 10));
-            ballRigidbody.MovePosition(moveTowards);
+            float movementSpeed = maxMoveSpeed / 10;
+            moveBall(0 , movementSpeed);
         }
         // Left
         else if (moveDirection == 4)
         {
-            Vector3 moveTowards = new Vector3(currentPosition.x, currentPosition.y, currentPosition.z - (maxMoveSpeed / 10));
-            ballRigidbody.MovePosition(moveTowards);
+            float movementSpeed = -maxMoveSpeed / 10;
+            moveBall(0 , movementSpeed);
         }
     }
 
@@ -102,7 +102,14 @@ public class BallBehavior : MonoBehaviour
         if (other.CompareTag("Wall"))
         {
             moveDirection = 0;
-            isMoving = false; 
+            // moveBall(0, 0);
+            isMoving = false;
         }
+    }
+
+    void moveBall(float movementSpeedX, float movementSpeedZ)
+    {
+        Vector3 moveTowards = new Vector3(currentPosition.x + movementSpeedX, currentPosition.y, currentPosition.z + movementSpeedZ);
+        ballRigidbody.MovePosition(moveTowards);
     }
 }
