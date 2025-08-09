@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.meta.xr.sdk.voice": {
+      "version": "77.0.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.burst": {
       "version": "1.8.24",
       "depth": 0,
@@ -30,7 +37,7 @@
       "source": "builtin",
       "dependencies": {
         "com.unity.xr.oculus": "4.2.0",
-        "com.unity.xr.openxr": "1.11.0"
+        "com.unity.xr.openxr": "1.12.0"
       }
     },
     "com.unity.ide.visualstudio": {
@@ -204,8 +211,8 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.openxr": {
-      "version": "1.11.0",
-      "depth": 0,
+      "version": "1.12.0",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.inputsystem": "1.6.3",
