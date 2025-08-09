@@ -16,31 +16,34 @@ public class Menu : MonoBehaviour
         
     }
 
-    private void OnEnable()
-    {
-        openMenuButton.action.Enable();
-    }
-
     // Update is called once per frame
     void Update()
     {
-        if (openMenuButton.action.triggered)
-        {
-            toggleMenu();
-        }
+
     }
 
-    private void toggleMenu()
+    private void OnEnable()
     {
-        if (!isMenuOpen)
+        openMenuButton.action.Enable();
+        openMenuButton.action.performed += toggleMenu;
+    }
+
+    private void OnDisable()
+    {
+        openMenuButton.action.performed -= toggleMenu;
+        openMenuButton.action.Disable();
+    }
+
+    private void toggleMenu(InputAction.CallbackContext context)
+    {
+        isMenuOpen = !isMenuOpen;
+        if (isMenuOpen)
         {
-            floorMaterial.color = floorMaterial.color;
-            isMenuOpen = true;
+            floor.GetComponent<Renderer>().material.color = Color.red;
         }
         else
         {
-            floorMaterial.color = Color.red;
-            isMenuOpen = false;
+            floor.GetComponent<Renderer>().material.color = floorMaterial.color;
         }
     }
 }
