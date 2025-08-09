@@ -1,23 +1,32 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class WaterManager : MonoBehaviour
 {
 
-    [SerializeField] private GameObject waterPlane;   
+    [SerializeField] private Volume volume;
+    [SerializeField] private GameObject waterPlane;
+    [SerializeField] private Color color;
+    [SerializeField] private float fogDensity;
 
+    private void Update()
+    {
+        RenderSettings.fogColor = color;
+        RenderSettings.fogDensity = fogDensity;
+    }
     public void EnableWater()
     {
-        waterPlane.SetActive(true);
+        volume.enabled = true;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
-        RenderSettings.fogColor = new Color(0.0f, 0.4f, 0.7f);
-        RenderSettings.fogDensity = 0.05f;
+        RenderSettings.fogColor = color;
+        RenderSettings.fogDensity = fogDensity;
         WaterSceneState.IsWaterEnabled = true;
     }
 
     public void DisableWater()
     {
-        waterPlane.SetActive(false);
+        volume.enabled = false;
         RenderSettings.fog = false;
         WaterSceneState.IsWaterEnabled = false;
     }
