@@ -12,14 +12,14 @@ public class WaterManager : MonoBehaviour
         RenderSettings.fogMode = FogMode.ExponentialSquared;
         RenderSettings.fogColor = new Color(0.0f, 0.4f, 0.7f);
         RenderSettings.fogDensity = 0.05f;
-        WaterSceneState.isWaterEnabled = true;
+        WaterSceneState.IsWaterEnabled = true;
     }
 
     public void DisableWater()
     {
         waterPlane.SetActive(false);
         RenderSettings.fog = false;
-        WaterSceneState.isWaterEnabled = false;
+        WaterSceneState.IsWaterEnabled = false;
     }
 
     private void OnEnable()

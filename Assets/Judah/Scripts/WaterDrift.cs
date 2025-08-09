@@ -12,7 +12,7 @@ public class WaterDrift : MonoBehaviour
 
     void Update()
     {
-        if (WaterSceneState.isWaterEnabled)
+        if (WaterSceneState.IsWaterEnabled)
         {
             //pos.x += driftVal;
             //transform.localPosition = new Vector3(pos.x += driftSpeed, pos.y, pos.z);
