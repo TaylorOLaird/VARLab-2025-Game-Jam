@@ -3,16 +3,16 @@ using UnityEngine;
 
 public static class EventManager
 {
-    public static event Action OnHeadsetDon;
-    public static event Action OnHeadsetDoff;
+    public static event Action<GameObject> OnHeadsetDon;
+    public static event Action<GameObject> OnHeadsetDoff;
 
-    public static void HeadsetDon()
+    public static void HeadsetDon(GameObject headset)
     {
-        OnHeadsetDon?.Invoke();
+        OnHeadsetDon?.Invoke(headset);
     }
-    public static void HeadsetDoff()
+    public static void HeadsetDoff(GameObject headset)
     {
-        OnHeadsetDoff?.Invoke();
+        OnHeadsetDoff?.Invoke(headset);
     }
 
 }

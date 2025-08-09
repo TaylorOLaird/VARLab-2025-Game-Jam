@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class HMDManager : MonoBehaviour
 {
-    public GameObject HMDHitbox;
+    public GameObject HMDDoffHitbox;
+    public GameObject HMDDonHitbox;
     public XRSocketInteractor socketInteractor;
+    public XRGrabInteractable grabInteractable;
     public Stack<GameObject> HMDStack = new Stack<GameObject>();
 
     void Start()
@@ -16,8 +19,10 @@ public class HMDManager : MonoBehaviour
         Camera mainCamera = Camera.main;
         if (mainCamera != null)
         {
-            HMDHitbox.transform.parent = mainCamera.transform;
-            HMDHitbox.transform.localPosition = Vector3.zero;
+            HMDDoffHitbox.transform.parent = mainCamera.transform;
+            HMDDoffHitbox.transform.localPosition = Vector3.zero;
+            HMDDonHitbox.transform.parent = mainCamera.transform;
+            HMDDonHitbox.transform.localPosition = Vector3.zero;
         }
         else
         {
@@ -27,7 +32,11 @@ public class HMDManager : MonoBehaviour
         if (socketInteractor != null)
         {
             socketInteractor.selectEntered.AddListener(DonWaitAndProcess);
-            socketInteractor.selectExited.AddListener(ProcessHeadsetDoff);
+        }
+
+        if (grabInteractable != null)
+        {
+            grabInteractable.selectEntered.AddListener(ProcessHeadsetDoff);
         }
     }
     private void DonWaitAndProcess(SelectEnterEventArgs args)
@@ -43,22 +52,32 @@ public class HMDManager : MonoBehaviour
 
     private void ProcessHeadsetDon(SelectEnterEventArgs args)
     {
-        // Fire the headset don event
-        EventManager.HeadsetDon();
-
         // Get the GameObject that was slotted
         GameObject slottedObject = args.interactableObject.transform.gameObject;
+
+        // Fire the headset don event
+        EventManager.HeadsetDon(slottedObject);
+
+        slottedObject.SetActive(false);
+
+        // Add the slotted object to the stack
+        HMDStack.Push(slottedObject);
     }
 
-    private void ProcessHeadsetDoff(SelectExitEventArgs args)
+    private void ProcessHeadsetDoff(SelectEnterEventArgs args)
     {
-        // Fire the headset doff event
-        EventManager.HeadsetDoff();
-
-        // Get the GameObject that was removed
-        GameObject removedObject = args.interactableObject.transform.gameObject;
-
-        Debug.Log($"Object removed: {removedObject.name}");
+        // Pop the top object from the stack
+        if (HMDStack.Count > 0)
+        {
+            GameObject headset = HMDStack.Pop();
+            headset.SetActive(true);
+            // Fire the headset doff event
+            EventManager.HeadsetDoff(headset);
+        }
+        else
+        {
+            Debug.LogWarning("No headset available to doff.");
+        }
 
     }
 }
