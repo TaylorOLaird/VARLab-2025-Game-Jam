@@ -80,7 +80,7 @@ public class BallBehavior : MonoBehaviour
             isMoving = true;
         }
     }
-    public void moveBackwards()
+    public void moveBackward()
     {
         if (!isMoving)
         {
