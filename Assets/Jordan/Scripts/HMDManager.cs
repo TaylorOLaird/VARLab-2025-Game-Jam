@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
@@ -11,7 +12,7 @@ public class HMDManager : MonoBehaviour
     public GameObject HMDDonHitbox;
     public XRSocketInteractor socketInteractor;
     public XRGrabInteractable grabInteractable;
-    public Stack<GameObject> HMDStack = new Stack<GameObject>();
+    public Stack<HMD> HMDStack = new Stack<HMD>();
 
     void Start()
     {
@@ -46,7 +47,7 @@ public class HMDManager : MonoBehaviour
 
     private IEnumerator DelayedHeadsetDon(SelectEnterEventArgs args)
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.1f);
         ProcessHeadsetDon(args);
     }
 
@@ -55,29 +56,65 @@ public class HMDManager : MonoBehaviour
         // Get the GameObject that was slotted
         GameObject slottedObject = args.interactableObject.transform.gameObject;
 
+        if(slottedObject.GetComponent<HMD>() == null)
+        {
+            Debug.LogWarning("The slotted object does not have an HMD component.");
+            return;
+        }
+
+        HMD hmd = slottedObject.GetComponent<HMD>();
+
         // Fire the headset don event
-        EventManager.HeadsetDon(slottedObject);
+        EventManager.HeadsetDon(hmd);
 
         slottedObject.SetActive(false);
 
         // Add the slotted object to the stack
-        HMDStack.Push(slottedObject);
+        HMDStack.Push(hmd);
     }
 
     private void ProcessHeadsetDoff(SelectEnterEventArgs args)
     {
-        // Pop the top object from the stack
-        if (HMDStack.Count > 0)
-        {
-            GameObject headset = HMDStack.Pop();
-            headset.SetActive(true);
-            // Fire the headset doff event
-            EventManager.HeadsetDoff(headset);
-        }
-        else
+        if (HMDStack.Count <= 0)
         {
             Debug.LogWarning("No headset available to doff.");
+            return;
+        }
+        HMD hmd = HMDStack.Pop();
+        GameObject headset = hmd.gameObject;
+        headset.SetActive(true);
+        // Fire the headset doff event
+        EventManager.HeadsetDoff(hmd);
+
+        // Get the interactor that grabbed THIS object
+        var handInteractor = args.interactorObject as XRBaseInteractor;
+        if (handInteractor == null || headset == null)
+        {
+            Debug.LogWarning("Interactor or headset is null during doff process.");
+            return;
+        }
+            
+        var manager = handInteractor.interactionManager;
+        if (manager == null)
+        {
+            Debug.LogWarning("Interaction manager is null during doff process.");
+            return;
         }
 
+        // If the hand is holding something else (besides this), drop it
+        //if (handInteractor.hasSelection && handInteractor.firstInteractableSelected != this)
+        //{
+        //    manager.SelectExit(handInteractor, handInteractor.firstInteractableSelected);
+        //}
+
+        // Force grab the other object
+        var grabInteractable = headset.GetComponent<XRGrabInteractable>();
+        if (grabInteractable == null)
+        {
+            Debug.LogWarning("The headset does not have an XRGrabInteractable component.");
+            return;
+        }
+
+        manager.SelectEnter(handInteractor, (IXRSelectInteractable)grabInteractable);
     }
 }
