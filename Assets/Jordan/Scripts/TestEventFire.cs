@@ -11,15 +11,15 @@ public class TestEventFire : MonoBehaviour
         EventManager.OnHeadsetDoff += HandleHeadsetDoff;
     }
 
-    public void HandleHeadsetDon(GameObject headset)
+    public void HandleHeadsetDon(HMD headset)
     {
         Debug.Log("Headset Don event received!");
-        Debug.Log("Headset GameObject: " + headset.name);
+        Debug.Log("Headset GameObject: " + headset.gameObject.name);
     }
 
-    public void HandleHeadsetDoff(GameObject headset)
+    public void HandleHeadsetDoff(HMD headset)
     {
         Debug.Log("Headset Doff event received!");
-        Debug.Log("Headset GameObject: " + headset.name);
+        Debug.Log("Headset GameObject: " + headset.gameObject.name);
     }
 }
