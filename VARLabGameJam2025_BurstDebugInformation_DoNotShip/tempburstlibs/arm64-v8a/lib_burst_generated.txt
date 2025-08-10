@@ -11,11 +11,11 @@ Library: C:\Users\li842927\VARLab-2025-Game-Jam\Temp\BurstOutput\tempburstlibs\a
 --target-framework=NetFramework
 --float-mode=Fast
 --generate-link-xml=Temp\burst.link.xml
---temp-folder=C:\Users\li842927\VARLab-2025-Game-Jam\Temp\Burst
+--temp-folder=C:\Users\ta187904\Desktop\GameJam\Temp\Burst
 --force-disable-frame-info-registration
---key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.42f1/Editor/Data/PlaybackEngines/AndroidPlayer
---decode-folder=C:\Users\li842927\VARLab-2025-Game-Jam\Library\Burst
---output=C:\Users\li842927\VARLab-2025-Game-Jam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
+--key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.39f1/Editor/Data/PlaybackEngines/AndroidPlayer
+--decode-folder=C:\Users\ta187904\Desktop\GameJam\Library\Burst
+--output=C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/
 
 --method=Unity.Jobs.IJobForExtensions+ForJobStruct`1[[UnityEngine.Rendering.Universal.ZBinningJob, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]], UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::Execute(UnityEngine.Rendering.Universal.ZBinningJob&, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|Unity.Jobs.LowLevel.Unsafe.JobRanges&, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)--77fc393cb521ac129b1392d4eb94d29a
@@ -30,11 +30,11 @@ Library: C:\Users\li842927\VARLab-2025-Game-Jam\Temp\BurstOutput\tempburstlibs\a
 --float-precision=Standard
 --target-framework=NetFramework
 --generate-link-xml=Temp\burst.link.xml
---temp-folder=C:\Users\li842927\VARLab-2025-Game-Jam\Temp\Burst
+--temp-folder=C:\Users\ta187904\Desktop\GameJam\Temp\Burst
 --force-disable-frame-info-registration
---key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.42f1/Editor/Data/PlaybackEngines/AndroidPlayer
---decode-folder=C:\Users\li842927\VARLab-2025-Game-Jam\Library\Burst
---output=C:\Users\li842927\VARLab-2025-Game-Jam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
+--key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.39f1/Editor/Data/PlaybackEngines/AndroidPlayer
+--decode-folder=C:\Users\ta187904\Desktop\GameJam\Library\Burst
+--output=C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/
 
 --method=UnityEngine.XR.Interaction.Toolkit.Utilities.BurstMathUtility, Unity.XR.Interaction.Toolkit, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::ProjectOnPlane(Unity.Mathematics.float3&, Unity.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null|Unity.Mathematics.float3&, Unity.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null|Unity.Mathematics.float3&, Unity.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null)--1819bc9925667b008fd6c3e6019ccf71
