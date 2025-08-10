@@ -11,6 +11,9 @@ TagManager:
   - Floor
   - Anchor
   - Door
+  - Red
+  - Blue
+  - Green
   layers:
   - Default
   - TransparentFX
