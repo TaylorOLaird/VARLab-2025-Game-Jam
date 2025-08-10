@@ -140,40 +140,51 @@ public class MovingPlatform : MonoBehaviour
     }
 
     void SetupPathLine()
+{
+    if (!showPathLine)
     {
-        if (!showPathLine) { if (_pathLR) _pathLR.enabled = false; return; }
-
-        if (_pathLR == null)
-        {
-            var go = new GameObject("__PathLine");
-            go.transform.SetParent(transform, worldPositionStays: false);
-            go.transform.localPosition = Vector3.zero;
-            go.transform.localRotation = Quaternion.identity;
-
-            _pathLR = go.AddComponent<LineRenderer>();
-            _pathLR.useWorldSpace = true;
-            _pathLR.textureMode = LineTextureMode.Stretch;
-            _pathLR.alignment = LineAlignment.View;
-            _pathLR.numCapVertices = 4;
-            _pathLR.numCornerVertices = 2;
-
-            // Try URP/Unlit; fall back to default
-            var sh = Shader.Find("Universal Render Pipeline/Unlit");
-            Material mat = sh ? new Material(sh) : new Material(Shader.Find("Sprites/Default"));
-            _pathLR.material = mat;
-        }
-
-        _pathLR.enabled = true;
-        _pathLR.startWidth = _pathLR.endWidth = pathLineWidth;
-        _pathLR.material.SetColor("_BaseColor", pathLineColor); // URP/Unlit
-        if (_pathLR.material.HasProperty("_Color"))
-            _pathLR.material.SetColor("_Color", pathLineColor); // fallback
-
-        // set points: start + checkpoints
-        _pathLR.positionCount = _path.Count;
-        for (int i = 0; i < _path.Count; i++)
-            _pathLR.SetPosition(i, _path[i]);
+        if (_pathLR) _pathLR.enabled = false;
+        return;
     }
+
+    if (_pathLR == null)
+    {
+        var go = new GameObject("__PathLine");
+        go.transform.SetParent(transform, worldPositionStays: false);
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localRotation = Quaternion.identity;
+
+        _pathLR = go.AddComponent<LineRenderer>();
+        _pathLR.useWorldSpace = true;
+        _pathLR.textureMode = LineTextureMode.Stretch;
+        _pathLR.alignment = LineAlignment.View;
+        _pathLR.numCapVertices = 4;
+        _pathLR.numCornerVertices = 2;
+        
+        var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (!sh) sh = Shader.Find("Sprites/Default");
+
+        // Assign via sharedMaterial to avoid instantiation/leaks in edit mode
+        var mat = new Material(sh) { name = "__PathLine_Mat" };
+        _pathLR.sharedMaterial = mat;
+    }
+
+    _pathLR.enabled = true;
+    _pathLR.startWidth = _pathLR.endWidth = pathLineWidth;
+
+    var grad = new Gradient();
+    grad.SetKeys(
+        new[] { new GradientColorKey(pathLineColor, 0f), new GradientColorKey(pathLineColor, 1f) },
+        new[] { new GradientAlphaKey(pathLineColor.a, 0f), new GradientAlphaKey(pathLineColor.a, 1f) }
+    );
+    _pathLR.colorGradient = grad;
+
+    // Set points: start + checkpoints
+    _pathLR.positionCount = _path.Count;
+    for (int i = 0; i < _path.Count; i++)
+        _pathLR.SetPosition(i, _path[i]);
+}
+
 
     void FixedUpdate()
     {
