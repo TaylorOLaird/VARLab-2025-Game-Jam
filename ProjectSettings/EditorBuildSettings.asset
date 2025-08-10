@@ -14,10 +14,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Jordan/Scenes/HMD.unity
     guid: d09b47c8332e8de439faced2801b6e3f
-  - enabled: 0
+  - enabled: 1
     path: Assets/Berk/Scenes/SampleScene.unity
     guid: b61d8110fdb6baf4685d3dc20c818e43
-  - enabled: 0
+  - enabled: 1
     path: Assets/Berk/Scenes/MiniScene1.unity
     guid: 79aaea58f5d4de74490cb4dc8ae07b87
   m_configObjects:
