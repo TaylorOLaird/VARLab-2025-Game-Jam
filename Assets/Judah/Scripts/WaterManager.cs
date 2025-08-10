@@ -3,9 +3,9 @@ using UnityEngine.Rendering;
 
 public class WaterManager : MonoBehaviour
 {
-
+    [SerializeField] private GameObject moveNormal;
+    [SerializeField] private GameObject moveFlying;
     [SerializeField] private Volume volume;
-    [SerializeField] private GameObject waterPlane;
     [SerializeField] private Color color;
     [SerializeField] private float fogDensity;
 
@@ -16,6 +16,8 @@ public class WaterManager : MonoBehaviour
     }
     public void EnableWater()
     {
+        moveNormal.SetActive(false);
+        moveFlying.SetActive(true);
         volume.enabled = true;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
@@ -26,6 +28,9 @@ public class WaterManager : MonoBehaviour
 
     public void DisableWater()
     {
+        moveNormal.SetActive(true);
+        moveFlying.SetActive(false);
+        cc.SimpleMove(Vector3.zero);
         volume.enabled = false;
         RenderSettings.fog = false;
         WaterSceneState.IsWaterEnabled = false;
