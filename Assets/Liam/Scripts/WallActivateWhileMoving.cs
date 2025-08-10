@@ -9,7 +9,7 @@ public class WallActivateWhileMoving : MonoBehaviour
     {
         ballScript = transform.parent.GetComponent<BallBehavior>();
     }
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Wall"))
         {
