@@ -1004,8 +1004,8 @@ MonoBehaviour:
       - word_events
   _configData:
   - {fileID: -686823477692163689}
-  - {fileID: -8243129682282075502}
-  - {fileID: 3830768548505132771}
+  - {fileID: 0}
+  - {fileID: 0}
   _configurationId: d53421ff-aaf8-437f-b97e-262af416342e
   _requestType: 0
   _requestTimeoutMs: 10000
