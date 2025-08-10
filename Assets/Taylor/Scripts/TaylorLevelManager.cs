@@ -11,6 +11,7 @@ public class TaylorLevelManager : MonoBehaviour
     [SerializeField] private Volume CameraFlash;
     [SerializeField] private AudioSource cameraSound;
     [SerializeField] private float flashOffset = 0.0f;
+    [SerializeField] private CameraColider cameraColliderScript;
     private int FlashDuration = 0;
 
     void Start()
@@ -56,5 +57,11 @@ public class TaylorLevelManager : MonoBehaviour
         // play camera sound starting at 0.1 seconds in
         cameraSound.time = flashOffset;
         cameraSound.Play();
+        // check if the camera collider scripts currentColliderName is not empty
+        if (!string.IsNullOrEmpty(cameraColliderScript.currentColliderName))
+        {
+            Debug.Log("Camera flash effect triggered on collider: " + cameraColliderScript.currentColliderName);
+            FlashDuration += 100;
+        }
     }
 }
