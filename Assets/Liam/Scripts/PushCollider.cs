@@ -22,23 +22,27 @@ public class PushCollider : MonoBehaviour
         if (other.CompareTag("GameController"))
         {
             // Front collider - Ball goes backwards
-            if (position.x < 0 && position.z == 0)
+            if (position.x == 0 && position.z > 0)
             {
+                // Debug.Log("FrontCollider");
                 ballScript.moveBackward();
             }
             // Back collider - Ball goes forwards
-            else if (position.x > 0 && position.z == 0)
+            else if (position.x == 0 && position.z < 0)
             {
+                // Debug.Log("BackCollider");
                 ballScript.moveForward();
             }
             // Right collider - Ball goes left
-            else if (position.x == 0 && position.z > 0)
+            else if (position.x > 0 && position.z == 0)
             {
+                // Debug.Log("RightCollider");
                 ballScript.moveLeft();
             }
             // Left collider - Ball goes right
-            else if (position.x == 0 && position.z < 0)
+            else if (position.x < 0 && position.z == 0)
             {
+                // Debug.Log("LeftCollider");
                 ballScript.moveRight();
             }
         }
