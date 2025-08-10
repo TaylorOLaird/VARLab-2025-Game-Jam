@@ -40,6 +40,21 @@ public class HMDManager : MonoBehaviour
             grabInteractable.selectEntered.AddListener(ProcessHeadsetDoff);
         }
     }
+
+    void Update()
+    {
+        if (HMDDoffHitbox != null)
+        {
+            HMDDoffHitbox.transform.forward = Camera.main.transform.forward;
+            HMDDonHitbox.transform.forward = Camera.main.transform.forward;
+            if (HMDDoffHitbox.transform.localPosition != Vector3.zero)
+            {
+                HMDDoffHitbox.transform.localPosition = Vector3.zero;
+                
+            }
+        }
+    }
+
     private void DonWaitAndProcess(SelectEnterEventArgs args)
     {
         StartCoroutine(DelayedHeadsetDon(args));
@@ -82,6 +97,9 @@ public class HMDManager : MonoBehaviour
         }
         HMD hmd = HMDStack.Pop();
         GameObject headset = hmd.gameObject;
+
+        Debug.Log($"Headset {hmd.gameObject.name} has been doffed.");
+
         headset.SetActive(true);
         // Fire the headset doff event
         EventManager.HeadsetDoff(hmd);
@@ -102,10 +120,10 @@ public class HMDManager : MonoBehaviour
         }
 
         // If the hand is holding something else (besides this), drop it
-        //if (handInteractor.hasSelection && handInteractor.firstInteractableSelected != this)
-        //{
-        //    manager.SelectExit(handInteractor, handInteractor.firstInteractableSelected);
-        //}
+        if (handInteractor.hasSelection)
+        {
+            manager.SelectExit(handInteractor, handInteractor.firstInteractableSelected);
+        }
 
         // Force grab the other object
         var grabInteractable = headset.GetComponent<XRGrabInteractable>();
