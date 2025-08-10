@@ -9,12 +9,12 @@ public class SpeakingEvents : MonoBehaviour
 
     public void Start()
     {
-        speaker.SpeakQueued("Wakey wakey you sleep dope. We've got a long day of experimentation ahead of us!");
+        speaker.SpeakQueued("Wakey wakey you sleepy dope. We've got a long day of experimentation ahead of us!");
     }
 
-    public void GoThroughDoor()
+    public void GoThroughDoor(string textToSpeak)
     {
-        speaker.SpeakQueued("Since it is your birthday today, we've got some special experiments to run. Smiley face.");
+        speaker.SpeakQueued(textToSpeak);
     }
 
 }

@@ -1039,7 +1039,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.238
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1072,6 +1072,14 @@ PrefabInstance:
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6232745470614056090, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_Radius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6232745470614056090, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_IncludeLayers.m_Bits
+      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1130,7 +1138,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8630640014682177774, guid: 2a3b3a882d9cfc74392ec24693855ae8, type: 3}
   m_PrefabInstance: {fileID: 591979837}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &519394729
+--- !u!1 &525017258
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1138,38 +1146,52 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 519394730}
-  - component: {fileID: 519394731}
-  - component: {fileID: 519394732}
-  m_Layer: 2
+  - component: {fileID: 525017261}
+  - component: {fileID: 525017260}
+  - component: {fileID: 525017259}
+  m_Layer: 0
   m_Name: DoorCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &519394730
-Transform:
+--- !u!114 &525017259
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519394729}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.70710576, z: -0, w: 0.70710784}
-  m_LocalPosition: {x: 0.18799642, y: -0.022, z: 1.07108}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &519394731
+  m_GameObject: {fileID: 525017258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 341876b9f59ed4c458efae14598894d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Speak:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 485351903}
+        m_TargetAssemblyTypeName: SpeakingEvents, Assembly-CSharp
+        m_MethodName: GoThroughDoor
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  TextToSpeak: Since it is your birthday today, we've got some special experiments
+    to run. Smiley face.
+--- !u!65 &525017260
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519394729}
+  m_GameObject: {fileID: 525017258}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -1182,35 +1204,23 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.2918171, y: 2.438477, z: 0.019717643}
-  m_Center: {x: 1.2639902, y: 1.2192383, z: 0.014988427}
---- !u!114 &519394732
-MonoBehaviour:
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &525017261
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519394729}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 341876b9f59ed4c458efae14598894d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Speak:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 485351903}
-        m_TargetAssemblyTypeName: SpeakingEvents, Assembly-CSharp
-        m_MethodName: GoThroughDoor
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  m_GameObject: {fileID: 525017258}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.14097565, y: -0.76327527, z: -0.5462711}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1977281387}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &533435223
 GameObject:
   m_ObjectHideFlags: 0
@@ -5839,6 +5849,38 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &1977281386
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1977281387}
+  m_Layer: 0
+  m_Name: SpeakingColliders
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1977281387
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977281386}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.44097567, y: 1.7512344, z: 2.853271}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 525017261}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &2009374893 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6063437939348833093, guid: f9049e68d6cc045489d3067a12fd45d5, type: 3}
@@ -6070,4 +6112,4 @@ SceneRoots:
   - {fileID: 601516926}
   - {fileID: 1204215060}
   - {fileID: 485351904}
-  - {fileID: 519394730}
+  - {fileID: 1977281387}
