@@ -135,7 +135,7 @@ public class LevelManager : MonoBehaviour
         // … then hold longer (extra second or two)
         yield return new WaitForSeconds(blackHold + Mathf.Max(0f, blackHoldExtra));
 
-        if (HMDManager.Instance) HMDManager.Instance.ResetHeadsetsToSpawn();
+        if (HMDManagerLaser.Instance) HMDManagerLaser.Instance.ResetHeadsetsToSpawn();
 
         // place the player safely while fully black
         yield return StartCoroutine(SafePlacePlayer(playerRoot));
