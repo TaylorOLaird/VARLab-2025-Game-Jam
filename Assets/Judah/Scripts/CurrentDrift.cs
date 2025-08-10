@@ -4,13 +4,16 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class CurrentDrift : MonoBehaviour
 {
+
+    [SerializeField] WaterManager waterManager;
     [SerializeField] float driftSpeed = 1.5f;
     [SerializeField] float directionSmoothing = 12f;
     [SerializeField] float skin = 0.01f;
     [SerializeField] float maxStep = 1f;
+    [SerializeField] float oppositeSnapDot = -0.9995f;
+    public static int goalsReached = 0;
 
     BoxCollider box;
-    readonly HashSet<Collider> activeTriggers = new HashSet<Collider>();
     Vector3 currentDir = Vector3.zero;
 
     void Awake()
@@ -28,19 +31,49 @@ public class CurrentDrift : MonoBehaviour
         // find overlapping triggers (no RB needed)
         var overlaps = Physics.OverlapBox(centerWS, halfWS, rotWS, ~0, QueryTriggerInteraction.Collide);
 
+        // sum trigger up vectors
         Vector3 summed = Vector3.zero;
         foreach (var c in overlaps)
-            if (c && c.isTrigger) summed += c.transform.up.normalized;
+        {
+            if (c && c.isTrigger)
+            {
+                // use rotation*Vector3.up for a stable world up from the trigger
+                Vector3 up = (c.transform.rotation * Vector3.up).normalized;
+                summed += up;
+            }
+        }
 
         Vector3 targetDir = summed.sqrMagnitude > 0f ? summed.normalized : Vector3.zero;
-        currentDir = Vector3.Slerp(currentDir, targetDir, 1f - Mathf.Exp(-directionSmoothing * Time.fixedDeltaTime));
+
+        //  snap logic for 180° flips to eliminate sideways drift 
+        if (currentDir != Vector3.zero && targetDir != Vector3.zero)
+        {
+            float dot = Vector3.Dot(currentDir.normalized, targetDir); // both safe
+            if (dot <= oppositeSnapDot)
+            {
+                currentDir = targetDir; // instant realign on flip
+            }
+            else
+            {
+                currentDir = Vector3.Slerp(
+                    currentDir, targetDir,
+                    1f - Mathf.Exp(-directionSmoothing * Time.fixedDeltaTime));
+            }
+        }
+        else
+        {
+            // entering/exiting flow: just adopt target quickly
+            currentDir = Vector3.Slerp(
+                currentDir, targetDir,
+                1f - Mathf.Exp(-directionSmoothing * Time.fixedDeltaTime));
+        }
+        // -------------------------------------------------------------
 
         if (currentDir.sqrMagnitude == 0f) return;
 
         Vector3 desiredMove = currentDir * driftSpeed * Time.fixedDeltaTime;
-        SweepAndMove(desiredMove); 
+        SweepAndMove(desiredMove);
     }
-
 
     void SweepAndMove(Vector3 fullMove)
     {
@@ -54,7 +87,7 @@ public class CurrentDrift : MonoBehaviour
         {
             float step = Mathf.Min(remaining, maxStep);
 
-            // World-space box info
+            // Worldspace box info for this slice
             Vector3 centerWS = pos + transform.rotation * box.center;
             Vector3 halfWS = Vector3.Scale(box.size * 0.5f, transform.lossyScale);
             Quaternion rotWS = transform.rotation;
@@ -65,8 +98,8 @@ public class CurrentDrift : MonoBehaviour
             {
                 float travel = Mathf.Max(hit.distance - skin, 0f);
                 pos += dir * travel;
-                transform.position = pos;
-                return; // Stop on first solid hit
+                transform.position = pos; // stop flush
+                return;
             }
             else
             {
@@ -78,15 +111,16 @@ public class CurrentDrift : MonoBehaviour
         transform.position = pos;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (other.isTrigger)
-            activeTriggers.Add(other);
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (other.isTrigger)
-            activeTriggers.Remove(other);
+        if (other.CompareTag("Goal"))
+        {
+            ++goalsReached;
+            if (goalsReached == waterManager.goals)
+            {
+                waterManager.EndPuzzle();
+            }
+            GetComponent<CurrentDrift>().enabled = false;         
+        }
     }
 }
