@@ -7,10 +7,6 @@ using UnityEngine.Rendering;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
-using UnityEngine.Rendering.Universal;
-
-
-
 
 #if UNITY_EDITOR
 using UnityEditor;
