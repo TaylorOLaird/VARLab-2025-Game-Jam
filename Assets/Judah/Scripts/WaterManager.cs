@@ -24,20 +24,10 @@ public class WaterManager : MonoBehaviour
         }    
     }
 
-    private void Update()
-    {
-        RenderSettings.fogColor = color;
-        RenderSettings.fogDensity = fogDensity;
-    }
-
     [ContextMenu("EnableWater")]
     public void EnableWater()
     {
         volume.enabled = true;
-        RenderSettings.fog = true;
-        RenderSettings.fogMode = FogMode.ExponentialSquared;
-        RenderSettings.fogColor = color;
-        RenderSettings.fogDensity = fogDensity;
         WaterSceneState.IsWaterEnabled = true;
     }
 
@@ -45,7 +35,6 @@ public class WaterManager : MonoBehaviour
     public void DisableWater()
     {
         volume.enabled = false;
-        RenderSettings.fog = false;
         WaterSceneState.IsWaterEnabled = false;
     }
 
@@ -82,6 +71,10 @@ public class WaterManager : MonoBehaviour
         {
             ReverseCurrents();
         }
+        if (headset.gameObject.name == "HMDEnd")
+        {
+            Debug.Log("return to main scene");
+        }
         
     }
 
@@ -94,6 +87,10 @@ public class WaterManager : MonoBehaviour
         else if (headset.gameObject.name == "HMDCurrentFlow")
         {
             RestoreCurrents();
+        }
+        if (headset.gameObject.name == "HMDEnd")
+        {
+            Debug.Log("return to main scene");
         }
     }
 }
