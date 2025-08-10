@@ -31,21 +31,12 @@ public class ColliderManager : MonoBehaviour
             RaycastHit hit;
 
             // If you want to adjust the range value do it here
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * range, Color.yellow);
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.back) * range, Color.yellow);
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.right) * range, Color.yellow);
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.left) * range, Color.yellow);
+            // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * range, Color.yellow);
+            // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.back) * range, Color.yellow);
+            // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.right) * range, Color.yellow);
+            // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.left) * range, Color.yellow);
 
             if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, range, layerMask))
-            {
-                frontCollider.SetActive(false);
-            }
-            else
-            {
-                frontCollider.SetActive(true);
-            }
-
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.back), out hit, range, layerMask))
             {
                 backCollider.SetActive(false);
             }
@@ -54,16 +45,16 @@ public class ColliderManager : MonoBehaviour
                 backCollider.SetActive(true);
             }
 
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit, range, layerMask))
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.back), out hit, range, layerMask))
             {
-                rightCollider.SetActive(false);
+                frontCollider.SetActive(false);
             }
             else
             {
-                rightCollider.SetActive(true);
+                frontCollider.SetActive(true);
             }
 
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.left), out hit, range, layerMask))
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit, range, layerMask))
             {
                 leftCollider.SetActive(false);
             }
@@ -72,9 +63,14 @@ public class ColliderManager : MonoBehaviour
                 leftCollider.SetActive(true);
             }
 
-            // if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 2f, layerMask))
-            // {
-            // }
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.left), out hit, range, layerMask))
+            {
+                rightCollider.SetActive(false);
+            }
+            else
+            {
+                rightCollider.SetActive(true);
+            }
         }
     }
 }
