@@ -12,6 +12,8 @@ public class TaylorLevelManager : MonoBehaviour
     [SerializeField] private AudioSource cameraSound;
     [SerializeField] private float flashOffset = 0.0f;
     [SerializeField] private CameraColider cameraColliderScript;
+    [SerializeField] private List<GameObject> objectsToSwitch;
+    private string currentRelmName = "Lab";
     private int FlashDuration = 0;
 
     void Start()
@@ -20,6 +22,7 @@ public class TaylorLevelManager : MonoBehaviour
         EventManager.OnHeadsetDoff += removeHeadset;
 
         SceneManager.LoadSceneAsync("Assets/Taylor/Scenes/Lab.unity", LoadSceneMode.Additive);
+        displayObjectsInRelm();
     }
 
     void Update()
@@ -34,12 +37,33 @@ public class TaylorLevelManager : MonoBehaviour
         }
     }
 
+    private void displayObjectsInRelm()
+    {
+        foreach (GameObject obj in objectsToSwitch)
+        {
+            // get the ObjectSwitching component
+            ObjectSwitching objectSwitching = obj.GetComponent<ObjectSwitching>();
+            if (objectSwitching != null && objectSwitching.relmName == currentRelmName)
+            {
+                // enable the object
+                obj.SetActive(true);
+            }
+            else
+            {
+                // disable the object
+                obj.SetActive(false);
+            }
+        }
+    }
+
     public void addHeadset(HMD headset)
     {
         Debug.Log("Headset added - B&W enabled");
         volume.weight = 1f;
         SceneManager.LoadSceneAsync("Assets/Taylor/Scenes/Old.unity", LoadSceneMode.Additive);
         SceneManager.UnloadSceneAsync("Assets/Taylor/Scenes/Lab.unity");
+        currentRelmName = "Old";
+        displayObjectsInRelm();
     }
 
     public void removeHeadset(HMD headset)
@@ -48,6 +72,8 @@ public class TaylorLevelManager : MonoBehaviour
         volume.weight = 0f;
         SceneManager.LoadSceneAsync("Assets/Taylor/Scenes/Lab.unity", LoadSceneMode.Additive);
         SceneManager.UnloadSceneAsync("Assets/Taylor/Scenes/Old.unity");
+        currentRelmName = "Lab";
+        displayObjectsInRelm();
     }
 
     public void CameraFlashEffect()
@@ -60,8 +86,23 @@ public class TaylorLevelManager : MonoBehaviour
         // check if the camera collider scripts currentColliderName is not empty
         if (!string.IsNullOrEmpty(cameraColliderScript.currentColliderName))
         {
-            Debug.Log("Camera flash effect triggered on collider: " + cameraColliderScript.currentColliderName);
-            FlashDuration += 100;
+            if (cameraColliderScript.currentColliderName == "TestTrigger")
+            {
+                // find game object named "TestTriggerBlock"
+                GameObject testTriggerBlock = GameObject.Find("TestTriggerBlock");
+                // find its ObjectSwitching component
+                ObjectSwitching objectSwitching = testTriggerBlock.GetComponent<ObjectSwitching>();
+
+                if (currentRelmName == "Lab")
+                {
+                    objectSwitching.relmName = "Old";
+                }
+                else if (currentRelmName == "Old")
+                {
+                    objectSwitching.relmName = "Lab";
+                }
+                displayObjectsInRelm();
+            }
         }
     }
 }
