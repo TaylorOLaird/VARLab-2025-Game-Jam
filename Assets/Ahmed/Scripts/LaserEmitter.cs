@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
-public class LaserEmitterURP : MonoBehaviour
+public class LaserEmitter : MonoBehaviour
 {
     public enum LaserType { Red, Green, Blue }
 
