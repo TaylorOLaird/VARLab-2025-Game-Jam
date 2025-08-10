@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class HMD : MonoBehaviour
 {
+    // 2d sprite for the headset
+    public Sprite headsetSprite;
+
     // Start is called before the first frame update
     void Start()
     {
