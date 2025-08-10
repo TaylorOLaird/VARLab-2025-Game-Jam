@@ -13,6 +13,7 @@ public class TaylorLevelManager : MonoBehaviour
     [SerializeField] private float flashOffset = 0.0f;
     [SerializeField] private CameraColider cameraColliderScript;
     [SerializeField] private List<GameObject> objectsToSwitch;
+
     private string currentRelmName = "Lab";
     private int FlashDuration = 0;
 
@@ -41,16 +42,13 @@ public class TaylorLevelManager : MonoBehaviour
     {
         foreach (GameObject obj in objectsToSwitch)
         {
-            // get the ObjectSwitching component
             ObjectSwitching objectSwitching = obj.GetComponent<ObjectSwitching>();
             if (objectSwitching != null && objectSwitching.relmName == currentRelmName)
             {
-                // enable the object
                 obj.SetActive(true);
             }
             else
             {
-                // disable the object
                 obj.SetActive(false);
             }
         }
@@ -80,18 +78,29 @@ public class TaylorLevelManager : MonoBehaviour
     {
         CameraFlash.weight = 1f;
         FlashDuration = 3;
-        // play camera sound starting at 0.1 seconds in
         cameraSound.time = flashOffset;
         cameraSound.Play();
-        // check if the camera collider scripts currentColliderName is not empty
         if (!string.IsNullOrEmpty(cameraColliderScript.currentColliderName))
         {
             if (cameraColliderScript.currentColliderName == "TestTrigger")
             {
-                // find game object named "TestTriggerBlock"
-                GameObject testTriggerBlock = GameObject.Find("TestTriggerBlock");
-                // find its ObjectSwitching component
+                GameObject testTriggerBlock = GameObject.Find("Flowers_01 (1)");
                 ObjectSwitching objectSwitching = testTriggerBlock.GetComponent<ObjectSwitching>();
+
+                if (currentRelmName == "Lab")
+                {
+                    objectSwitching.relmName = "Old";
+                }
+                else if (currentRelmName == "Old")
+                {
+                    objectSwitching.relmName = "Lab";
+                }
+                displayObjectsInRelm();
+            }
+            else if (cameraColliderScript.currentColliderName == "doorTrigger")
+            {
+                GameObject testTriggerBlock2 = GameObject.Find("Broken Door");
+                ObjectSwitching objectSwitching = testTriggerBlock2.GetComponent<ObjectSwitching>();
 
                 if (currentRelmName == "Lab")
                 {
