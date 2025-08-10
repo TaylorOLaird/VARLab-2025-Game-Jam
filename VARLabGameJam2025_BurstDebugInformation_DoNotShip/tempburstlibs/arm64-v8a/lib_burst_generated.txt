@@ -1,6 +1,7 @@
 Library: C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
 --platform=Android
---backend=burst-llvm-16
+--minimum-os-version=
+--backend=burst-llvm-19
 --target=ARMV8A_AARCH64
 --global-safety-checks-setting=Off
 --disable-safety-checks
@@ -11,6 +12,7 @@ Library: C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-
 --float-mode=Fast
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=C:\Users\ta187904\Desktop\GameJam\Temp\Burst
+--force-disable-frame-info-registration
 --key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.39f1/Editor/Data/PlaybackEngines/AndroidPlayer
 --decode-folder=C:\Users\ta187904\Desktop\GameJam\Library\Burst
 --output=C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
@@ -19,7 +21,8 @@ Library: C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-
 --method=Unity.Jobs.IJobForExtensions+ForJobStruct`1[[UnityEngine.Rendering.Universal.ZBinningJob, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]], UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::Execute(UnityEngine.Rendering.Universal.ZBinningJob&, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|Unity.Jobs.LowLevel.Unsafe.JobRanges&, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)--77fc393cb521ac129b1392d4eb94d29a
 --method=Unity.Jobs.IJobForExtensions+ForJobStruct`1[[UnityEngine.Rendering.Universal.TileRangeExpansionJob, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]], UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::Execute(UnityEngine.Rendering.Universal.TileRangeExpansionJob&, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|Unity.Jobs.LowLevel.Unsafe.JobRanges&, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)--adceb2156d08d59afc9749dc2521fd2b
 --platform=Android
---backend=burst-llvm-16
+--minimum-os-version=
+--backend=burst-llvm-19
 --target=ARMV8A_AARCH64
 --global-safety-checks-setting=Off
 --meta-data-generation=False
@@ -28,6 +31,7 @@ Library: C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-
 --target-framework=NetFramework
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=C:\Users\ta187904\Desktop\GameJam\Temp\Burst
+--force-disable-frame-info-registration
 --key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.39f1/Editor/Data/PlaybackEngines/AndroidPlayer
 --decode-folder=C:\Users\ta187904\Desktop\GameJam\Library\Burst
 --output=C:\Users\ta187904\Desktop\GameJam\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
