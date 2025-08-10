@@ -14,8 +14,8 @@ public class BallBehavior : MonoBehaviour
     [SerializeField] GameObject meshObject;
 
     [SerializeField] GameObject trail;
-    [SerializeField]ParticleSystem particleTrail1;
-    [SerializeField]ParticleSystem particleTrail2;
+    [SerializeField] ParticleSystem particleTrail1;
+    [SerializeField] ParticleSystem particleTrail2;
 
     EmissionModule emissionTrail1;
 
@@ -30,6 +30,8 @@ public class BallBehavior : MonoBehaviour
     Vector3 currentPosition;
 
     Vector3 restPosition;
+
+    Vector3 startPosition;
 
     [Range(0f, 1.5f)]
     [SerializeField] float maxMoveSpeed;
@@ -54,7 +56,7 @@ public class BallBehavior : MonoBehaviour
         animator = meshObject.GetComponent<Animator>();
         currentPosition = transform.position;
         isInitialized = false;
-        
+
 
         emissionTrail1 = particleTrail1.emission;
         emissionTrail2 = particleTrail2.emission;
@@ -84,6 +86,7 @@ public class BallBehavior : MonoBehaviour
             trail.transform.rotation = Quaternion.Euler(0f, 0f, 0f); // temp
             emissionTrail1.rateOverTime = emissionCount; // temp
             emissionTrail2.rateOverTime = emissionCount; // temp
+            isMoving = true; // temp
 
             float movementSpeed = -maxMoveSpeed / 10;
             float rotationSpeed = maxRotateSpeed * 10;
@@ -98,6 +101,7 @@ public class BallBehavior : MonoBehaviour
             trail.transform.rotation = Quaternion.Euler(0f, 180f, 0f); // temp
             emissionTrail1.rateOverTime = emissionCount; // temp
             emissionTrail2.rateOverTime = emissionCount; // temp
+            isMoving = true; // temp
 
             float movementSpeed = maxMoveSpeed / 10;
             float rotationSpeed = -maxRotateSpeed * 10;
@@ -112,6 +116,7 @@ public class BallBehavior : MonoBehaviour
             trail.transform.rotation = Quaternion.Euler(0f, 270f, 0f); // temp
             emissionTrail1.rateOverTime = emissionCount; // temp
             emissionTrail2.rateOverTime = emissionCount; // temp
+            isMoving = true; // temp
 
             float movementSpeed = maxMoveSpeed / 10;
             float rotationSpeed = maxRotateSpeed * 10;
@@ -126,6 +131,7 @@ public class BallBehavior : MonoBehaviour
             trail.transform.rotation = Quaternion.Euler(0f, 90f, 0f); // temp
             emissionTrail1.rateOverTime = emissionCount; // temp
             emissionTrail2.rateOverTime = emissionCount; // temp
+            isMoving = true; // temp
 
             float movementSpeed = -maxMoveSpeed / 10;
             float rotationSpeed = -maxRotateSpeed * 10;
@@ -139,14 +145,14 @@ public class BallBehavior : MonoBehaviour
     {
         if (!isMoving)
         {
-            movement(1,0f,"JumpFront");
+            movement(1, 0f, "JumpFront");
         }
     }
     public void moveBackward()
     {
         if (!isMoving)
         {
-            movement(2,180f,"JumpBack");
+            movement(2, 180f, "JumpBack");
         }
     }
 
@@ -154,7 +160,7 @@ public class BallBehavior : MonoBehaviour
     {
         if (!isMoving)
         {
-            movement(3,90f,"JumpRight");
+            movement(3, 90f, "JumpRight");
         }
     }
 
@@ -162,7 +168,7 @@ public class BallBehavior : MonoBehaviour
     {
         if (!isMoving)
         {
-            movement(4,270f,"JumpLeft");
+            movement(4, 270f, "JumpLeft");
         }
     }
 
@@ -181,6 +187,7 @@ public class BallBehavior : MonoBehaviour
     }
 
 
+    // Used for the edge case where a wall is activated on top of the ball while it is moving
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Wall"))
@@ -188,8 +195,10 @@ public class BallBehavior : MonoBehaviour
             moveDirection = 0;
 
             transform.position = restPosition;
-
-            animator.SetTrigger(jumpBoolString);
+            if (isMoving)
+            {
+                animator.SetTrigger(jumpBoolString);
+            }
 
             meshObject.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
 
@@ -204,6 +213,7 @@ public class BallBehavior : MonoBehaviour
             if (!isInitialized)
             {
                 transform.position = restPosition;
+                startPosition = restPosition;
                 isInitialized = true;
             }
             tileCheck = other.GetComponent<TileCheck>();
@@ -226,4 +236,10 @@ public class BallBehavior : MonoBehaviour
         Vector3 rotation = new Vector3(maxRotateSpeedX, 0f, maxRotateSpeedZ);
         meshObject.transform.Rotate(rotation);
     }
+
+    public void ballReset()
+    {
+        ballRigidbody.MovePosition(startPosition);
+    }
+    
 }

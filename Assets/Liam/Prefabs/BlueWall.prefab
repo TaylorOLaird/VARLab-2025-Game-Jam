@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -3670307551055968192}
   - component: {fileID: -5133335615013083354}
   m_Layer: 6
-  m_Name: Wall
+  m_Name: BlueWall
   m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
