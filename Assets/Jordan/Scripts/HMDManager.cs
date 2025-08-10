@@ -14,6 +14,8 @@ public class HMDManager : MonoBehaviour
     public XRGrabInteractable grabInteractable;
     public Stack<HMD> HMDStack = new Stack<HMD>();
 
+    private Vector3 lastDoffHitboxLocalPos;
+
     void Start()
     {
         // Find the main camera in the XR Origin rig
@@ -40,6 +42,19 @@ public class HMDManager : MonoBehaviour
             grabInteractable.selectEntered.AddListener(ProcessHeadsetDoff);
         }
     }
+
+    void Update()
+    {
+        if (HMDDoffHitbox != null)
+        {
+            if (HMDDoffHitbox.transform.localPosition != lastDoffHitboxLocalPos)
+            {
+                HMDDoffHitbox.transform.localPosition = Vector3.zero;
+                lastDoffHitboxLocalPos = Vector3.zero;
+            }
+        }
+    }
+
     private void DonWaitAndProcess(SelectEnterEventArgs args)
     {
         StartCoroutine(DelayedHeadsetDon(args));
@@ -82,6 +97,9 @@ public class HMDManager : MonoBehaviour
         }
         HMD hmd = HMDStack.Pop();
         GameObject headset = hmd.gameObject;
+
+        Debug.Log($"Headset {hmd.gameObject.name} has been doffed.");
+
         headset.SetActive(true);
         // Fire the headset doff event
         EventManager.HeadsetDoff(hmd);
@@ -102,10 +120,10 @@ public class HMDManager : MonoBehaviour
         }
 
         // If the hand is holding something else (besides this), drop it
-        //if (handInteractor.hasSelection && handInteractor.firstInteractableSelected != this)
-        //{
-        //    manager.SelectExit(handInteractor, handInteractor.firstInteractableSelected);
-        //}
+        if (handInteractor.hasSelection)
+        {
+            manager.SelectExit(handInteractor, handInteractor.firstInteractableSelected);
+        }
 
         // Force grab the other object
         var grabInteractable = headset.GetComponent<XRGrabInteractable>();
