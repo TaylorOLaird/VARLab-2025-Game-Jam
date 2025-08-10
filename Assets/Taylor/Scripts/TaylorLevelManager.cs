@@ -9,6 +9,8 @@ public class TaylorLevelManager : MonoBehaviour
 {
     [SerializeField] private Volume volume;
     [SerializeField] private Volume CameraFlash;
+    [SerializeField] private AudioSource cameraSound;
+    [SerializeField] private float flashOffset = 0.0f;
     private int FlashDuration = 0;
 
     void Start()
@@ -51,5 +53,8 @@ public class TaylorLevelManager : MonoBehaviour
     {
         CameraFlash.weight = 1f;
         FlashDuration = 3;
+        // play camera sound starting at 0.1 seconds in
+        cameraSound.time = flashOffset;
+        cameraSound.Play();
     }
 }
