@@ -14,8 +14,6 @@ public class HMDManager : MonoBehaviour
     public XRGrabInteractable grabInteractable;
     public Stack<HMD> HMDStack = new Stack<HMD>();
 
-    private Vector3 lastDoffHitboxLocalPos;
-
     void Start()
     {
         // Find the main camera in the XR Origin rig
@@ -47,10 +45,12 @@ public class HMDManager : MonoBehaviour
     {
         if (HMDDoffHitbox != null)
         {
-            if (HMDDoffHitbox.transform.localPosition != lastDoffHitboxLocalPos)
+            HMDDoffHitbox.transform.forward = Camera.main.transform.forward;
+            HMDDonHitbox.transform.forward = Camera.main.transform.forward;
+            if (HMDDoffHitbox.transform.localPosition != Vector3.zero)
             {
                 HMDDoffHitbox.transform.localPosition = Vector3.zero;
-                lastDoffHitboxLocalPos = Vector3.zero;
+                
             }
         }
     }
