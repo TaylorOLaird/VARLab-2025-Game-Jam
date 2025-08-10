@@ -10,6 +10,7 @@ public class FirstRoomGameManager : MonoBehaviour
     public GameObject Bars;
     private XROrigin xrOrigin;
     public GameObject DoffHitbox;
+    public SceneSwitcher sceneSwitcher;
 
     private Vector3 savedPosition;
 
@@ -38,6 +39,11 @@ public class FirstRoomGameManager : MonoBehaviour
 
             Dimension1.SetActive(true);
             Dimension0.SetActive(false);
+        }
+        else if (headset.gameObject.name.Equals("EndHeadset"))
+        {
+            EventManager.RoomNumber = 1;
+            sceneSwitcher.SwitchScene("MainScene");
         }
     }
 
