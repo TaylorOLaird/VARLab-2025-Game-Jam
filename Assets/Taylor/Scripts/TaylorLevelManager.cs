@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 public class TaylorLevelManager : MonoBehaviour
 {
     [SerializeField] private Volume volume;
+    [SerializeField] private Volume CameraFlash;
+    private int FlashDuration = 0;
 
     void Start()
     {
@@ -19,7 +21,14 @@ public class TaylorLevelManager : MonoBehaviour
 
     void Update()
     {
-        
+        if (FlashDuration > 0)
+        {
+            FlashDuration --;
+        }
+        else
+        {
+            CameraFlash.weight = 0f;
+        }
     }
 
     public void addHeadset(HMD headset)
@@ -36,5 +45,11 @@ public class TaylorLevelManager : MonoBehaviour
         volume.weight = 0f;
         SceneManager.LoadSceneAsync("Assets/Taylor/Scenes/Lab.unity", LoadSceneMode.Additive);
         SceneManager.UnloadSceneAsync("Assets/Taylor/Scenes/Old.unity");
+    }
+
+    public void CameraFlashEffect()
+    {
+        CameraFlash.weight = 1f;
+        FlashDuration = 3;
     }
 }
