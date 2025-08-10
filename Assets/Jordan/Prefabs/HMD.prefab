@@ -550,3 +550,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8c43edcfc577e2479aa49978928217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  headsetSprite: {fileID: 21300000, guid: 856e8879b1181654aaabd39c106dff1c, type: 3}
