@@ -9,6 +9,11 @@ TagManager:
   - Ball
   - Exit
   - Floor
+  - Anchor
+  - Door
+  - Red
+  - Blue
+  - Green
   layers:
   - Default
   - TransparentFX
@@ -16,7 +21,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Wall
   - 
   - 
   - 
