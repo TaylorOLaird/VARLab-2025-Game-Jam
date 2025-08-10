@@ -14,7 +14,7 @@ public class PushCollider : MonoBehaviour
     {
         position = transform.localPosition;
 
-        ballScript = transform.parent.GetComponent<BallBehavior>();
+        ballScript = transform.parent.parent.GetComponent<BallBehavior>();
     }
 
     void OnTriggerEnter(Collider other)
