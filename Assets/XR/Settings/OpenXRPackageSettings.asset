@@ -141,6 +141,7 @@ MonoBehaviour:
   - {fileID: 853577665424141321}
   - {fileID: 4097421192052673547}
   - {fileID: -6683431783612301556}
+  - {fileID: -1936535051542514690}
   - {fileID: -9037002480306280849}
   - {fileID: 206540077348160259}
   - {fileID: -6333010088390616961}
@@ -150,9 +151,32 @@ MonoBehaviour:
   - {fileID: 1100970500071442211}
   - {fileID: 7174033415261895062}
   m_renderMode: 1
+  m_autoColorSubmissionMode: 1
+  m_colorSubmissionModes:
+    m_List: 00000000
   m_depthSubmissionMode: 0
   m_optimizeBufferDiscards: 1
   m_symmetricProjection: 0
+--- !u!114 &-1936535051542514690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7365b139f7aec43b23d26b7a48b5a6, type: 3}
+  m_Name: MetaQuestTouchPlusControllerProfile Android
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Meta Quest Touch Plus Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.metaquestplus
+  openxrExtensionStrings: XR_META_touch_controller_plus
+  company: Unity
+  priority: 0
+  required: 0
 --- !u!114 &-1194577839993558640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,6 +388,26 @@ MonoBehaviour:
   required: 0
   cacheSize: 1048576
   perThreadCacheSize: 51200
+--- !u!114 &1454530422410416523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7365b139f7aec43b23d26b7a48b5a6, type: 3}
+  m_Name: MetaQuestTouchPlusControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Meta Quest Touch Plus Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.metaquestplus
+  openxrExtensionStrings: XR_META_touch_controller_plus
+  company: Unity
+  priority: 0
+  required: 0
 --- !u!114 &1685029370101868922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -702,6 +746,7 @@ MonoBehaviour:
   - {fileID: 5894853235916741928}
   - {fileID: -606857567203366482}
   - {fileID: 3268378356472789993}
+  - {fileID: 1454530422410416523}
   - {fileID: 9098246230845914441}
   - {fileID: -7813391815657709561}
   - {fileID: 592885076525179968}
@@ -712,6 +757,9 @@ MonoBehaviour:
   - {fileID: 9202408309684867782}
   - {fileID: 7377718078390380615}
   m_renderMode: 1
+  m_autoColorSubmissionMode: 1
+  m_colorSubmissionModes:
+    m_List: 00000000
   m_depthSubmissionMode: 0
   m_optimizeBufferDiscards: 0
   m_symmetricProjection: 0
