@@ -17,6 +17,7 @@ public class WallAlign : MonoBehaviour
         {
             if (other.CompareTag("Floor"))
             {
+                
             transform.position = new Vector3(other.transform.position.x, transform.position.y - 0.02f, other.transform.position.z);
             isAligned = true;
             }
