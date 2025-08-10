@@ -1,38 +1,50 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class CurrentDrift : MonoBehaviour
 {
-    [SerializeField] private Collider contactCollider; 
-    [SerializeField] private float driftSpeed = 0.5f;  
-    [SerializeField] private Vector3 driftDirection = new Vector3(1, 0, 0); 
+    [SerializeField] float driftSpeed = 0.5f;
+    [SerializeField] float directionSmoothing = 12f;
 
-    private Rigidbody rb;
-    private bool isDrifting;
+    Rigidbody rb;
+    readonly HashSet<Collider> activeTriggers = new HashSet<Collider>();
+    Vector3 currentDir = Vector3.zero; 
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
     }
 
     void FixedUpdate()
     {
-        if (isDrifting && contactCollider != null)
+        Vector3 summed = Vector3.zero;
+        foreach (var col in activeTriggers)
         {
-            rb.MovePosition(rb.position + driftDirection.normalized * driftSpeed * Time.fixedDeltaTime);
+            if (!col) continue;
+
+            Vector3 dir = col.transform.up;
+            summed += dir.normalized;
+        }
+
+        Vector3 targetDir = summed.sqrMagnitude > 0f ? summed.normalized : Vector3.zero;
+        currentDir = Vector3.Slerp(currentDir, targetDir, 1f - Mathf.Exp(-directionSmoothing * Time.fixedDeltaTime));
+
+        if (currentDir.sqrMagnitude > 0f)
+        {
+            rb.MovePosition(rb.position + currentDir * driftSpeed * Time.fixedDeltaTime);
         }
     }
 
-    void OnTriggerStay(Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        if (other == contactCollider)
-            isDrifting = true;
+        if (other.isTrigger) activeTriggers.Add(other);
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (other == contactCollider)
-            isDrifting = false;
+        if (other.isTrigger) activeTriggers.Remove(other);
     }
 }
