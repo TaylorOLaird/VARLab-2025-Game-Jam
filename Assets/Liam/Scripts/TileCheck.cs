@@ -13,7 +13,7 @@ public class TileCheck : MonoBehaviour
 
     public void setTileActive()
     {
-        GetComponent<Renderer>().material.color = Color.blue;
+        GetComponent<Renderer>().material.color = Color.white;
         tileActive = true;
     }
     public bool getTileActive()
