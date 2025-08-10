@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
+[RequireComponent(typeof(Rigidbody))] // needed so the child trigger fires reliably
 public class LaserEmitter : MonoBehaviour
 {
     public enum LaserType { Red, Green, Blue }
@@ -40,6 +41,13 @@ public class LaserEmitter : MonoBehaviour
     public Transform impactDecal;
     public ParticleSystem impactParticles;
 
+    [Header("Lethal Beam Trigger")]
+    public bool lethal = true;
+    [Tooltip("Radius (thickness) of the hit trigger around the beam (meters).")]
+    public float beamRadius = 0.06f;
+    [Tooltip("Tag on the XR Rig/player root.")]
+    public string playerTag = "Player";
+
     struct RingSlot
     {
         public Renderer r;
@@ -52,16 +60,77 @@ public class LaserEmitter : MonoBehaviour
     Vector3 _start, _end;
     LaserType _lastAppliedLaser;
 
-    void OnEnable() { Ensure(); CacheRingSlots(); UpdateAll(true); }
+    // physics + trigger
+    Rigidbody _rb;
+    Transform _beamTriggerTf;
+    BoxCollider _beamTrigger;
+
+    void Reset()
+    {
+        // Configure Rigidbody for triggers
+        var rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+    }
+
+    void OnEnable()   { Ensure(); CacheRingSlots(); UpdateAll(true); }
     void OnValidate() { Ensure(); CacheRingSlots(); UpdateAll(true); }
-    void Update() { UpdateAll(false); }
+    void Update()     { UpdateAll(false); }
 
     void Ensure()
     {
+        // RB for trigger callbacks
+        if (!_rb) _rb = GetComponent<Rigidbody>();
+        if (_rb)
+        {
+            _rb.isKinematic = true;
+            _rb.useGravity = false;
+            _rb.interpolation = RigidbodyInterpolation.Interpolate;
+            _rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        }
+
+        // MPBs + LR settings
         _mpbCore ??= new MaterialPropertyBlock();
         _mpbGlow ??= new MaterialPropertyBlock();
         if (coreLR) coreLR.textureMode = LineTextureMode.Tile;
         if (glowLR) glowLR.textureMode = LineTextureMode.Tile;
+
+        EnsureBeamTrigger();
+    }
+
+    void EnsureBeamTrigger()
+    {
+        // Create/find a child with a BoxCollider trigger that we align to the beam
+        if (_beamTriggerTf == null)
+        {
+            var t = transform.Find("__BeamTrigger");
+            if (!t)
+            {
+                var go = new GameObject("__BeamTrigger");
+                go.layer = gameObject.layer;           // inherit layer
+                go.transform.SetParent(transform, false);
+                _beamTriggerTf = go.transform;
+                _beamTrigger = go.AddComponent<BoxCollider>();
+                _beamTrigger.isTrigger = true;
+
+                // Relay to parent
+                var relay = go.AddComponent<BeamHitRelay>();
+                relay.owner = this;
+            }
+            else
+            {
+                _beamTriggerTf = t;
+                _beamTrigger = _beamTriggerTf.GetComponent<BoxCollider>();
+                if (!_beamTrigger) _beamTrigger = _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
+                _beamTrigger.isTrigger = true;
+
+                var relay = _beamTriggerTf.GetComponent<BeamHitRelay>();
+                if (!relay) relay = _beamTriggerTf.gameObject.AddComponent<BeamHitRelay>();
+                relay.owner = this;
+            }
+        }
     }
 
     void CacheRingSlots()
@@ -89,11 +158,8 @@ public class LaserEmitter : MonoBehaviour
                 }
             }
         }
-        if (_ringSlots.Count == 0)
-        {
-            // Optional: uncomment to see warnings in Console
-            // Debug.LogWarning($"[{name}] No ring slots found. Assign ringMaterialAsset or set ringMaterialNameContains.");
-        }
+        // Optional: warn if none found
+        // if (_ringSlots.Count == 0) Debug.LogWarning($"[{name}] No ring slots found.");
     }
 
     void UpdateAll(bool force)
@@ -101,6 +167,7 @@ public class LaserEmitter : MonoBehaviour
         _start = transform.position;
         var dir = transform.forward;
 
+        // Where does the beam end?
         if (Physics.Raycast(_start, dir, out var hit, maxDistance, hitMask, QueryTriggerInteraction.Ignore))
         {
             _end = hit.point;
@@ -129,8 +196,8 @@ public class LaserEmitter : MonoBehaviour
         Color baseCol = laser switch
         {
             LaserType.Green => new Color(0.00f, 0.90f, 0.15f, 1f),
-            LaserType.Blue => new Color(0.10f, 0.30f, 1.00f, 1f),
-            _ => new Color(1.00f, 0.05f, 0.02f, 1f),
+            LaserType.Blue  => new Color(0.10f, 0.30f, 1.00f, 1f),
+            _               => new Color(1.00f, 0.05f, 0.02f, 1f),
         };
 
         // Beam tint (URP/Unlit Additive): keep intensities modest
@@ -138,15 +205,19 @@ public class LaserEmitter : MonoBehaviour
         Color glowCol = baseCol * glowIntensity;
 
         float length = Vector3.Distance(_start, _end);
-        if (coreLR) { coreLR.GetPropertyBlock(_mpbCore); SetBeamMPB(_mpbCore, coreCol, length); coreLR.SetPropertyBlock(_mpbCore); }
-        if (glowLR) { glowLR.GetPropertyBlock(_mpbGlow); SetBeamMPB(_mpbGlow, glowCol, length); glowLR.SetPropertyBlock(_mpbGlow); }
+        if (coreLR) { coreLR.GetPropertyBlock(_mpbCore);  SetBeamMPB(_mpbCore, coreCol, length);  coreLR.SetPropertyBlock(_mpbCore); }
+        if (glowLR) { glowLR.GetPropertyBlock(_mpbGlow);  SetBeamMPB(_mpbGlow, glowCol, length);  glowLR.SetPropertyBlock(_mpbGlow); }
 
         // Update ring only when color changed or forced
         if (force || _lastAppliedLaser != laser)
         {
             SetRingPerInstance(baseCol, ringEmission);
             _lastAppliedLaser = laser;
-    }
+        }
+
+        // Update lethal beam trigger to match the visible segment
+        if (lethal) UpdateBeamTrigger(_start, _end, beamRadius);
+        else if (_beamTrigger) _beamTrigger.enabled = false;
     }
 
     void ApplyLine(LineRenderer lr, float width, Vector3 a, Vector3 b, bool caps)
@@ -179,7 +250,7 @@ public class LaserEmitter : MonoBehaviour
     {
         if (_ringSlots.Count == 0) return;
 
-        // Dark base to avoid additive whitening; most of the look via emission
+        // Dark base; look via emission
         Color baseDark = new Color(0.02f, 0.02f, 0.02f, 1f);
         Color emissive = baseCol * intensity;
 
@@ -191,13 +262,57 @@ public class LaserEmitter : MonoBehaviour
             mpb.SetColor("_BaseColor", baseDark);
             mpb.SetColor("_EmissionColor", emissive);
 
-            // Apply to the specific material index on that renderer
             slot.r.SetPropertyBlock(mpb, slot.matIndex);
 
-            // store back (struct)
             slot.mpb = mpb;
             _ringSlots[i] = slot;
         }
+    }
+
+    // --- LETHAL TRIGGER ---
+
+    void UpdateBeamTrigger(Vector3 a, Vector3 b, float radius)
+    {
+        EnsureBeamTrigger();
+        if (!_beamTriggerTf || !_beamTrigger) return;
+
+        _beamTrigger.enabled = true;
+
+        Vector3 mid = (a + b) * 0.5f;
+        Vector3 dir = (b - a);
+        float len = dir.magnitude;
+        if (len < 0.001f) len = 0.001f;
+
+        _beamTriggerTf.SetPositionAndRotation(mid, Quaternion.LookRotation(dir.normalized, Vector3.up));
+        _beamTrigger.size = new Vector3(Mathf.Max(0.001f, radius * 2f), Mathf.Max(0.001f, radius * 2f), len);
+        _beamTrigger.center = Vector3.zero; // already centered by transform
+    }
+
+    internal void OnBeamTriggerTouched(Collider other)
+    {
+        if (!lethal || other == null) return;
+
+        var root = other.transform.root;
+        if (!root.CompareTag(playerTag)) return;
+
+        // Hand off to your level manager (guard if it's busy)
+        var lm = LevelManager.Instance;
+        if (lm != null)
+        {
+            if (!lm.IsRespawning) lm.KillPlayer(root);
+        }
+        else
+        {
+            Debug.LogWarning("[LaserEmitter] No LevelManager.Instance found.");
+        }
+    }
+
+    // Child relay to forward trigger messages to the parent
+    private class BeamHitRelay : MonoBehaviour
+    {
+        [HideInInspector] public LaserEmitter owner;
+        void OnTriggerEnter(Collider other) => owner?.OnBeamTriggerTouched(other);
+        void OnTriggerStay(Collider other)  => owner?.OnBeamTriggerTouched(other);
     }
 
     public void SetLaser(LaserType t) { laser = t; UpdateAll(true); }
