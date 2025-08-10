@@ -14,10 +14,7 @@ public class WaterDrift : MonoBehaviour
     {
         if (WaterSceneState.IsWaterEnabled)
         {
-            //pos.x += driftVal;
-            //transform.localPosition = new Vector3(pos.x += driftSpeed, pos.y, pos.z);
             rb.MovePosition(rb.position + driftDirection * driftSpeed * Time.fixedDeltaTime);
-            //pos = transform.localPosition;
         }
     }
 }
