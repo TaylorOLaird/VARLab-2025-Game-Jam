@@ -328,7 +328,7 @@ MonoBehaviour:
     enabled: 1
   - visibleName: Quest Pro
     manifestName: cambria
-    enabled: 0
+    enabled: 1
   - visibleName: Quest 3
     manifestName: eureka
     enabled: 1

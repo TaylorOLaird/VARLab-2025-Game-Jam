@@ -7,6 +7,8 @@ using UnityEngine.Rendering;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.Rendering.Universal;
+
 
 
 
@@ -46,6 +48,18 @@ public class WearableHeadsetPersistent : MonoBehaviour
 
     // cached grab listeners so we can unsubscribe
     List<XRGrabInteractable> _sceneGrabInteractables = new List<XRGrabInteractable>();
+
+    [Header("Debug / dev")]
+    [Tooltip("When true, clears persistent_objects.json on startup (useful for testing).")]
+    public bool flushPersistentDataOnStart = false;
+
+    void Start()
+    {
+        if (flushPersistentDataOnStart)
+        {
+            PersistentSceneStateManager.ClearAll();
+        }
+    }
 
     void Reset()
     {
@@ -105,6 +119,7 @@ public class WearableHeadsetPersistent : MonoBehaviour
         _isWorn = true;
 
         if (postProcessVolume != null) postProcessVolume.weight = 1f;
+
         foreach (var go in objectsToEnableOnWear) if (go) go.SetActive(true);
 
         if (!string.IsNullOrEmpty(dimensionSceneName) && loadSceneAdditively)
@@ -121,7 +136,7 @@ public class WearableHeadsetPersistent : MonoBehaviour
                 _sceneIsLoaded = true;
                 SetupGrabListenersForLoadedScene(_loadedScene);
                 // apply saved transforms for PersistentObjects (in case)
-                PersistentSceneStateManager.ApplySavedTransformsForScene(_loadedScene.name);
+                PersistentSceneStateManager.ApplySavedStatesForScene(_loadedScene.name);
             }
         }
         else if (!string.IsNullOrEmpty(dimensionSceneName) && !loadSceneAdditively)
@@ -167,10 +182,14 @@ public class WearableHeadsetPersistent : MonoBehaviour
             _sceneIsLoaded = true;
 
             // Apply saved transforms to persistent objects (so they appear where player left them)
-            PersistentSceneStateManager.ApplySavedTransformsForScene(scene.name);
+            PersistentSceneStateManager.ApplySavedStatesForScene(scene.name);
 
             // Set up grab listeners so we know what the player grabs inside this loaded scene
             SetupGrabListenersForLoadedScene(scene);
+
+            // NEW: if the player is currently holding persistent objects in another scene (e.g. main),
+            // move those held objects into this loaded additive scene and register them.
+            TransferHeldObjectsToLoadedScene();
         }
     }
 
@@ -252,8 +271,56 @@ public class WearableHeadsetPersistent : MonoBehaviour
             if (go == null) continue;
             // move to main scene so it isn't destroyed with the additive scene unload
             SceneManager.MoveGameObjectToScene(go, main);
+
+            // now persist that this object is in the main scene and record its transform
+            PersistentSceneStateManager.MarkObjectInSceneAndSave(go, main.name);
+
             // remove from tracking set (now it's in main scene)
             _currentlyHeldFromLoadedScene.Remove(go);
         }
     }
+    // add near other methods in WearableHeadsetPersistent
+    void TransferHeldObjectsToLoadedScene()
+    {
+        if (!_sceneIsLoaded || !_loadedScene.IsValid()) return;
+
+        // find all XRGrabInteractables in the project (including inactive ones)
+        var allGrabs = UnityEngine.Object.FindObjectsOfType<XRGrabInteractable>(true);
+
+        foreach (var grab in allGrabs)
+        {
+            if (grab == null) continue;
+
+            // only consider currently selected (held) items
+            if (!grab.isSelected) continue;
+
+            var go = grab.gameObject;
+            var p = go.GetComponent<PersistentObject>();
+            if (p == null || string.IsNullOrEmpty(p.id)) continue;
+
+            // if the grabbed object is not already part of the loaded additive scene, move it
+            if (go.scene != _loadedScene)
+            {
+                // Move into additive scene so it becomes part of that scene
+                SceneManager.MoveGameObjectToScene(go, _loadedScene);
+
+                // Ensure we have listeners so we track release/hold in the dimension
+                if (!_sceneGrabInteractables.Contains(grab))
+                {
+                    _sceneGrabInteractables.Add(grab);
+                    grab.selectEntered.AddListener(OnObjectSelectEntered);
+                    grab.selectExited.AddListener(OnObjectSelectExited);
+                }
+
+                // Track as currently held from the loaded scene (so MoveHeldObjectsToMainScene can handle it on unwear)
+                _currentlyHeldFromLoadedScene.Add(go);
+
+                // Persist that this object now belongs to the additive scene and save its transform
+                PersistentSceneStateManager.MarkObjectInSceneAndSave(go, _loadedScene.name);
+
+                Debug.Log($"[WearableHeadsetPersistent] Transferred held persistent object '{p.id}' into scene '{_loadedScene.name}'");
+            }
+        }
+    }
+
 }
