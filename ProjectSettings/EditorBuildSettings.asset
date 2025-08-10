@@ -14,10 +14,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Jordan/Scenes/HMD.unity
     guid: d09b47c8332e8de439faced2801b6e3f
-  - enabled: 0
+  - enabled: 1
     path: Assets/Berk/Scenes/SampleScene.unity
     guid: b61d8110fdb6baf4685d3dc20c818e43
-  - enabled: 0
+  - enabled: 1
     path: Assets/Berk/Scenes/MiniScene1.unity
     guid: 79aaea58f5d4de74490cb4dc8ae07b87
   m_configObjects:
@@ -27,4 +27,4 @@ EditorBuildSettings:
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: a49cadc1a815591479693b955ccf08c1, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 985fdffee33a5944396199c6b7145dd4, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 1e71e0ada4a204346b78e67625101e00, type: 2}
-    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 411b6dbe6763f5843bf5e7e3cd492215, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 8ba2f844974c73b4585a9080a73715a2, type: 2}
