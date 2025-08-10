@@ -59,6 +59,11 @@ public class LaserEmitter : MonoBehaviour
     public AudioClip deathSfx;
     [Range(0f, 1f)] public float deathSfxVolume = 1f;
 
+public static readonly List<LaserEmitter> All = new List<LaserEmitter>();
+
+[SerializeField] bool _suppressed; // when true, this beam is hidden & non-lethal
+    public LaserType ColorType => laser;
+
     struct RingSlot { public Renderer r; public int matIndex; public MaterialPropertyBlock mpb; }
 
     MaterialPropertyBlock _mpbCore, _mpbGlow;
@@ -84,9 +89,10 @@ public class LaserEmitter : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
     }
 
-    void OnEnable() { Ensure(); CacheRingSlots(); UpdateAll(true); }
+void OnEnable(){ if (!All.Contains(this)) All.Add(this); Ensure(); CacheRingSlots(); UpdateAll(true); }
+void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
+
     void OnValidate() { Ensure(); CacheRingSlots(); UpdateAll(true); }
-    void OnDisable() { if (_beamAudio) _beamAudio.Stop(); }
     void Update() { UpdateAll(false); }
 
     void Ensure()
@@ -122,23 +128,17 @@ public class LaserEmitter : MonoBehaviour
                 _beamTriggerTf = go.transform;
                 _beamTrigger = go.AddComponent<BoxCollider>();
                 _beamTrigger.isTrigger = true;
-
-                var relay = go.AddComponent<BeamHitRelay>();
-                relay.owner = this;
             }
             else
             {
                 _beamTriggerTf = t;
-                _beamTrigger = _beamTriggerTf.GetComponent<BoxCollider>() ?? _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
+                _beamTrigger = _beamTriggerTf.GetComponent<BoxCollider>()
+                               ?? _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
                 _beamTrigger.isTrigger = true;
-
-                var relay = _beamTriggerTf.GetComponent<BeamHitRelay>() ?? _beamTriggerTf.gameObject.AddComponent<BeamHitRelay>();
-                relay.owner = this;
             }
         }
     }
 
-    // -------- NEW: create a follower AudioSource ----------
     void EnsureBeamAudio()
     {
         if (_beamAudioTf == null)
@@ -174,7 +174,36 @@ public class LaserEmitter : MonoBehaviour
         // Assign clip if needed
         if (_beamAudio && _beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
     }
-    // ------------------------------------------------------
+
+    void OnTriggerEnter(Collider other) { OnBeamTriggerTouched(other); }
+    void OnTriggerStay(Collider other) { OnBeamTriggerTouched(other); }
+
+    public void SetSuppressed(bool value)
+    {
+        _suppressed = value;
+
+        // visuals
+        if (coreLR) coreLR.enabled = !value;
+        if (glowLR) glowLR.enabled = !value;
+
+        // lethal
+        if (_beamTrigger) _beamTrigger.enabled = lethal && !value;
+
+        // impact fx
+        if (impactDecal) impactDecal.gameObject.SetActive(!value && impactDecal.gameObject.activeSelf);
+        if (impactParticles)
+        {
+            if (value && impactParticles.isPlaying) impactParticles.Stop();
+            else if (!value && !impactParticles.isPlaying) impactParticles.Play();
+        }
+
+        // hum
+        if (_beamAudio)
+        {
+            if (value && _beamAudio.isPlaying) _beamAudio.Stop();
+            if (!value && humLoop && Application.isPlaying && !_beamAudio.isPlaying) _beamAudio.Play();
+        }
+    }
 
     void CacheRingSlots()
     {
@@ -203,6 +232,15 @@ public class LaserEmitter : MonoBehaviour
 
     void UpdateAll(bool force)
     {
+        if (_suppressed)
+    {
+        // keep trigger off & lines off while suppressed
+        if (_beamTrigger) _beamTrigger.enabled = false;
+        if (coreLR) coreLR.enabled = false;
+        if (glowLR) glowLR.enabled = false;
+        return;
+    }
+    
         _start = transform.position;
         var dir = transform.forward;
 
@@ -319,39 +357,33 @@ public class LaserEmitter : MonoBehaviour
         _beamTrigger.center = Vector3.zero;
     }
 
-internal void OnBeamTriggerTouched(Collider other)
-{
-    if (!lethal || other == null) return;
-
-    var root = other.transform.root;
-    if (!root.CompareTag(playerTag)) return;
-
-    var lm = LevelManager.Instance;
-    if (lm != null)
+    internal void OnBeamTriggerTouched(Collider other)
     {
-        // Only fire once per death
-        if (!lm.IsRespawning)
+        if (!lethal || other == null) return;
+
+        var root = other.transform.root;
+        if (!root.CompareTag(playerTag)) return;
+
+        var lm = LevelManager.Instance;
+        if (lm != null)
         {
-            if (deathSfx)
+            // Only fire once per death
+            if (!lm.IsRespawning)
             {
-                AudioSource.PlayClipAtPoint(deathSfx, this.playerHead.position, Mathf.Clamp01(deathSfxVolume));
+                if (deathSfx)
+                {
+                    Vector3 sfxPos = (playerHead != null) ? playerHead.position : root.position;
+                    AudioSource.PlayClipAtPoint(deathSfx, sfxPos, Mathf.Clamp01(deathSfxVolume));
+                }
+
+
+                lm.KillPlayer(root);
             }
-
-            lm.KillPlayer(root);
         }
-    }
-    else
-    {
-        Debug.LogWarning("[LaserEmitter] No LevelManager.Instance found.");
-    }
-}
-
-
-    private class BeamHitRelay : MonoBehaviour
-    {
-        [HideInInspector] public LaserEmitter owner;
-        void OnTriggerEnter(Collider other) => owner?.OnBeamTriggerTouched(other);
-        void OnTriggerStay(Collider other) => owner?.OnBeamTriggerTouched(other);
+        else
+        {
+            Debug.LogWarning("[LaserEmitter] No LevelManager.Instance found.");
+        }
     }
 
     public void SetLaser(LaserType t) { laser = t; UpdateAll(true); }

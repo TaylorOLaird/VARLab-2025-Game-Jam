@@ -10,15 +10,15 @@ public class LevelManager : MonoBehaviour
     public Transform respawnPoint;
 
     // CHANGED: give yourself a longer “black time” before fade-in
-    public float blackFadeIn  = 0.35f;  // to black
-    public float blackHold    = 0.10f;  // existing hold
+    public float blackFadeIn = 0.35f;  // to black
+    public float blackHold = 0.10f;  // existing hold
     public float blackHoldExtra = 1.50f; // NEW: extra hold (1–2s as requested)
     public float blackFadeOut = 0.40f;  // back to scene
 
     [Header("Hit Feedback")]
-    public float redFlashIn   = 0.08f;
+    public float redFlashIn = 0.08f;
     public float redFlashHold = 0.06f;
-    public float redFlashOut  = 0.12f;
+    public float redFlashOut = 0.12f;
     public ParticleSystem deathExplosionPrefab;
 
     [Header("XR Camera (for overlays)")]
@@ -74,8 +74,8 @@ public class LevelManager : MonoBehaviour
             return rt;
         }
 
-        FullRect("BlackFade", new Color(0,0,0,0), out _black);
-        FullRect("RedFlash",  new Color(1,0,0,0), out _red);
+        FullRect("BlackFade", new Color(0, 0, 0, 0), out _black);
+        FullRect("RedFlash", new Color(1, 0, 0, 0), out _red);
     }
 
     public void KillPlayer(Transform playerRoot)
@@ -135,8 +135,11 @@ public class LevelManager : MonoBehaviour
         // … then hold longer (extra second or two)
         yield return new WaitForSeconds(blackHold + Mathf.Max(0f, blackHoldExtra));
 
+        if (HMDManager.Instance) HMDManager.Instance.ResetHeadsetsToSpawn();
+
         // place the player safely while fully black
         yield return StartCoroutine(SafePlacePlayer(playerRoot));
+
 
         // fade back in
         yield return StartCoroutine(FadeTo(_black, 0f, blackFadeOut));

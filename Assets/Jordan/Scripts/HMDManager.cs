@@ -1,120 +1,162 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem.HID;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class HMDManager : MonoBehaviour
 {
+    public static HMDManager Instance { get; private set; }
+
+    [Header("Face Hitboxes")]
     public GameObject HMDDoffHitbox;
     public GameObject HMDDonHitbox;
-    public XRSocketInteractor socketInteractor;
-    public XRGrabInteractable grabInteractable;
-    public Stack<HMD> HMDStack = new Stack<HMD>();
+
+    [Header("XR")]
+    public XRSocketInteractor socketInteractor;      // face socket
+    public XRGrabInteractable grabInteractable;      // doff handle/button on face
+
+    [Header("State (debug)")]
+    public Stack<HMD> HMDStack = new Stack<HMD>();   // last donned on top
+    public HMD currentlyWorn;                        // null if none
+
+    List<HMD> _allHMDs = new List<HMD>();
+
+    void Awake()
+    {
+        if (Instance && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
 
     void Start()
     {
-        // Find the main camera in the XR Origin rig
-        Camera mainCamera = Camera.main;
-        if (mainCamera != null)
+        // Parent face hitboxes to XR camera
+        var cam = Camera.main;
+        if (cam)
         {
-            HMDDoffHitbox.transform.parent = mainCamera.transform;
-            HMDDoffHitbox.transform.localPosition = Vector3.zero;
-            HMDDonHitbox.transform.parent = mainCamera.transform;
-            HMDDonHitbox.transform.localPosition = Vector3.zero;
+            if (HMDDoffHitbox) { HMDDoffHitbox.transform.SetParent(cam.transform, false); HMDDoffHitbox.transform.localPosition = Vector3.zero; }
+            if (HMDDonHitbox)  { HMDDonHitbox.transform.SetParent(cam.transform, false);  HMDDonHitbox.transform.localPosition = Vector3.zero; }
         }
-        else
-        {
-            Debug.LogWarning("Main Camera not found in the scene.");
-        }
+        else Debug.LogWarning("Main Camera not found.");
 
-        if (socketInteractor != null)
-        {
-            socketInteractor.selectEntered.AddListener(DonWaitAndProcess);
-        }
+        if (socketInteractor) socketInteractor.selectEntered.AddListener(DonWaitAndProcess);
+        if (grabInteractable) grabInteractable.selectEntered.AddListener(ProcessHeadsetDoff);
 
-        if (grabInteractable != null)
-        {
-            grabInteractable.selectEntered.AddListener(ProcessHeadsetDoff);
-        }
-    }
-    private void DonWaitAndProcess(SelectEnterEventArgs args)
-    {
-        StartCoroutine(DelayedHeadsetDon(args));
+        // cache every HMD in the scene
+        _allHMDs.AddRange(FindObjectsOfType<HMD>(true));
     }
 
-    private IEnumerator DelayedHeadsetDon(SelectEnterEventArgs args)
+    // --- Wear flow ---
+    void DonWaitAndProcess(SelectEnterEventArgs args) => StartCoroutine(DelayedHeadsetDon(args));
+
+    IEnumerator DelayedHeadsetDon(SelectEnterEventArgs args)
     {
         yield return new WaitForSeconds(0.1f);
         ProcessHeadsetDon(args);
     }
 
-    private void ProcessHeadsetDon(SelectEnterEventArgs args)
+    void ProcessHeadsetDon(SelectEnterEventArgs args)
     {
-        // Get the GameObject that was slotted
-        GameObject slottedObject = args.interactableObject.transform.gameObject;
+        var go = args.interactableObject.transform.gameObject;
+        var hmd = go.GetComponent<HMD>();
+        if (!hmd) { Debug.LogWarning("Slotted object has no HMD component."); return; }
 
-        if(slottedObject.GetComponent<HMD>() == null)
+        // Unequip previous (if any)
+        if (currentlyWorn != null && currentlyWorn != hmd)
         {
-            Debug.LogWarning("The slotted object does not have an HMD component.");
-            return;
+            // push previous back on stack so doff grabs the last one
+            HMDStack.Push(currentlyWorn);
         }
 
-        HMD hmd = slottedObject.GetComponent<HMD>();
-
-        // Fire the headset don event
+        // Equip this one
+        currentlyWorn = hmd;
         EventManager.HeadsetDon(hmd);
 
-        slottedObject.SetActive(false);
+        // Hide the physical item while worn
+        go.SetActive(false);
 
-        // Add the slotted object to the stack
+        // Track stack (top = currently worn)
         HMDStack.Push(hmd);
+
+        // Global suppression by color
+        ApplyLaserSuppression(hmd.color);
     }
 
-    private void ProcessHeadsetDoff(SelectEnterEventArgs args)
+    void ProcessHeadsetDoff(SelectEnterEventArgs args)
+{
+    if (HMDStack.Count <= 0)
     {
-        if (HMDStack.Count <= 0)
-        {
-            Debug.LogWarning("No headset available to doff.");
-            return;
-        }
-        HMD hmd = HMDStack.Pop();
-        GameObject headset = hmd.gameObject;
-        headset.SetActive(true);
-        // Fire the headset doff event
-        EventManager.HeadsetDoff(hmd);
+        Debug.LogWarning("No headset available to doff.");
+        return;
+    }
 
-        // Get the interactor that grabbed THIS object
-        var handInteractor = args.interactorObject as XRBaseInteractor;
-        if (handInteractor == null || headset == null)
+    // Pop the worn HMD
+    var hmd = HMDStack.Pop();
+    var headsetGO = hmd.gameObject;
+    headsetGO.SetActive(true);
+    EventManager.HeadsetDoff(hmd);
+
+    currentlyWorn = null;
+    HMDStack.Clear(); // one-at-a-time
+
+    // Hand it to the grabbing hand
+    var handBase = args.interactorObject as XRBaseInteractor;
+    if (handBase == null)
+    {
+        Debug.LogWarning("Interactor null during doff.");
+        return;
+    }
+
+    var manager   = handBase.interactionManager;
+    var grabbable = headsetGO.GetComponent<XRGrabInteractable>();
+    var selInteractor = args.interactorObject as IXRSelectInteractor
+                        ?? handBase as IXRSelectInteractor
+                        ?? handBase.GetComponent<IXRSelectInteractor>();
+
+    if (manager != null && grabbable != null && selInteractor != null)
+    {
+        manager.SelectEnter(selInteractor, (IXRSelectInteractable)grabbable);
+    }
+    else
+    {
+        if (manager == null) Debug.LogWarning("Interaction Manager missing.");
+        if (grabbable == null) Debug.LogWarning("XRGrabInteractable missing on headset.");
+        if (selInteractor == null) Debug.LogWarning("Interactor is not an IXRSelectInteractor.");
+    }
+
+    // Clear suppression (no headset worn)
+    HMDManager.ApplyLaserSuppression(null);
+}
+
+
+    // Suppress all lasers of a color; null = show everything
+    public static void ApplyLaserSuppression(LaserEmitter.LaserType? colorOrNull)
+    {
+        foreach (var e in LaserEmitter.All)
+            e.SetSuppressed(colorOrNull.HasValue && e.ColorType == colorOrNull.Value);
+    }
+
+    // Called by LevelManager on death
+    public void ResetHeadsetsToSpawn()
+    {
+        // 1) Clear face socket (if anything is slotted)
+        if (socketInteractor && socketInteractor.hasSelection)
         {
-            Debug.LogWarning("Interactor or headset is null during doff process.");
-            return;
-        }
-            
-        var manager = handInteractor.interactionManager;
-        if (manager == null)
-        {
-            Debug.LogWarning("Interaction manager is null during doff process.");
-            return;
+            var sel = socketInteractor.firstInteractableSelected;
+            if (sel != null && socketInteractor.interactionManager != null)
+                socketInteractor.interactionManager.SelectExit(socketInteractor, sel);
         }
 
-        // If the hand is holding something else (besides this), drop it
-        //if (handInteractor.hasSelection && handInteractor.firstInteractableSelected != this)
-        //{
-        //    manager.SelectExit(handInteractor, handInteractor.firstInteractableSelected);
-        //}
+        // 2) Show all HMDs at their original locations
+        foreach (var h in _allHMDs)
+            if (h) h.ResetToSpawn();
 
-        // Force grab the other object
-        var grabInteractable = headset.GetComponent<XRGrabInteractable>();
-        if (grabInteractable == null)
-        {
-            Debug.LogWarning("The headset does not have an XRGrabInteractable component.");
-            return;
-        }
+        // 3) Clear local state
+        HMDStack.Clear();
+        currentlyWorn = null;
 
-        manager.SelectEnter(handInteractor, (IXRSelectInteractable)grabInteractable);
+        // 4) Show all lasers again
+        ApplyLaserSuppression(null);
     }
 }
