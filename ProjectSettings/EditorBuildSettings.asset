@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 17f8f9377dd1a3e41a8c2cbb8e8a4f0a
   - enabled: 1
+    path: Assets/Scenes/ChessScene.unity
+    guid: 00dd0cd7413403248a003364ad4c1cdd
+  - enabled: 1
     path: Assets/Scenes/Taylor.unity
     guid: 4beae438ef515c6489c8d651318d1ef1
   - enabled: 0
