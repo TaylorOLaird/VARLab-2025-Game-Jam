@@ -30,7 +30,6 @@ public class WaterManager : MonoBehaviour
     {
         moveNormal.SetActive(true);
         moveFlying.SetActive(false);
-        cc.SimpleMove(Vector3.zero);
         volume.enabled = false;
         RenderSettings.fog = false;
         WaterSceneState.IsWaterEnabled = false;
