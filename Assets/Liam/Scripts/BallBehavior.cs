@@ -216,7 +216,7 @@ public class BallBehavior : MonoBehaviour
                 startPosition = restPosition;
                 isInitialized = true;
             }
-            tileCheck = other.GetComponent<TileCheck>();
+            tileCheck = other.GetComponentInParent<TileCheck>();
 
             if (tileCheck.getTileActive() == false)
             {
