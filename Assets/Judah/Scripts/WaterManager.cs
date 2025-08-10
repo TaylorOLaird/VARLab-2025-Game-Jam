@@ -4,8 +4,8 @@ using UnityEngine.Rendering;
 
 public class WaterManager : MonoBehaviour
 {
-    [SerializeField] private GameObject moveNormal;
-    [SerializeField] private GameObject moveFlying;
+    public int goals;
+    [SerializeField] private GameObject EndHeadset;
     [SerializeField] private Volume volume;
     [SerializeField] private Color color;
     [SerializeField] private float fogDensity;
@@ -21,18 +21,18 @@ public class WaterManager : MonoBehaviour
         foreach (Transform child in currents.transform)
         {
             currentPivots.Add(child);
-        }
+        }    
     }
+
     private void Update()
     {
         RenderSettings.fogColor = color;
         RenderSettings.fogDensity = fogDensity;
     }
+
     [ContextMenu("EnableWater")]
     public void EnableWater()
     {
-        moveNormal.SetActive(false);
-        moveFlying.SetActive(true);
         volume.enabled = true;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
@@ -40,11 +40,10 @@ public class WaterManager : MonoBehaviour
         RenderSettings.fogDensity = fogDensity;
         WaterSceneState.IsWaterEnabled = true;
     }
+
     [ContextMenu("DisableWater")]
     public void DisableWater()
     {
-        moveNormal.SetActive(true);
-        moveFlying.SetActive(false);
         volume.enabled = false;
         RenderSettings.fog = false;
         WaterSceneState.IsWaterEnabled = false;
@@ -54,8 +53,8 @@ public class WaterManager : MonoBehaviour
     public void ReverseCurrents()
     {
         foreach (Transform pivot in currentPivots)
-        {
-            pivot.localEulerAngles = new Vector3(0f, 180f, 0f);
+        {    
+            pivot.localEulerAngles = new Vector3(0f, 180f, 0f);     
         }
     }
 
@@ -66,6 +65,11 @@ public class WaterManager : MonoBehaviour
         {
             pivot.localEulerAngles = new Vector3(0f, 0f, 0f);
         }
+    }
+
+    public void EndPuzzle()
+    {
+        EndHeadset.SetActive(true);
     }
 
     public void HandleHeadsetDon(HMD headset)
