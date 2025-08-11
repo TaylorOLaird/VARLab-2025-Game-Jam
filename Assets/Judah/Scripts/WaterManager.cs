@@ -13,6 +13,7 @@ public class WaterManager : MonoBehaviour
     [SerializeField] private GameObject movableCube;
     [SerializeField] private SceneSwitcher sceneSwitcher;
     [SerializeField] private SkyboxToggler skyboxToggler;
+    [SerializeField] private AudioSource underwaterAudio;
     private List<Transform> currentPivots;
     private Vector3 initialPos;
 
@@ -41,6 +42,7 @@ public class WaterManager : MonoBehaviour
     {
         skyboxToggler.DisableSkybox();
         volume.enabled = true;
+        underwaterAudio.Play();
         WaterSceneState.IsWaterEnabled = true;
     }
 
@@ -49,6 +51,7 @@ public class WaterManager : MonoBehaviour
     {
         skyboxToggler.EnableSkybox();
         volume.enabled = false;
+        underwaterAudio.Pause();
         WaterSceneState.IsWaterEnabled = false;
     }
 
