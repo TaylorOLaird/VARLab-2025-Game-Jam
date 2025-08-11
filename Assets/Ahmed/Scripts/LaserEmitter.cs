@@ -115,29 +115,72 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
         EnsureBeamAudio();
     }
 
-    void EnsureBeamTrigger()
+   void EnsureBeamTrigger()
+{
+    // 1) Find all children named __BeamTrigger; keep the first, delete the rest
+    Transform keep = null;
+    var toDelete = new List<GameObject>();
+    for (int i = 0; i < transform.childCount; i++)
     {
-        if (_beamTriggerTf == null)
+        var c = transform.GetChild(i);
+        if (c.name != "__BeamTrigger") continue;
+        if (keep == null) keep = c;
+        else toDelete.Add(c.gameObject);
+    }
+
+    // Delete extras (immediate in editor, normal in play)
+    for (int i = 0; i < toDelete.Count; i++)
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying) DestroyImmediate(toDelete[i]);
+        else
+#endif
+        Destroy(toDelete[i]);
+    }
+
+    // 2) Create one if none
+    if (keep == null)
+    {
+#if UNITY_EDITOR
+        // Avoid creating during prefab import/validation noise unless actually needed
+#endif
+        var go = new GameObject("__BeamTrigger");
+        go.layer = gameObject.layer;
+        go.transform.SetParent(transform, false);
+        keep = go.transform;
+    }
+
+    _beamTriggerTf = keep;
+
+    // 3) Ensure there is exactly one BoxCollider set as trigger
+    var colliders = _beamTriggerTf.GetComponents<BoxCollider>();
+    if (colliders.Length == 0)
+    {
+        _beamTrigger = _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
+    }
+    else
+    {
+        _beamTrigger = colliders[0];
+        for (int i = 1; i < colliders.Length; i++)
         {
-            var t = transform.Find("__BeamTrigger");
-            if (!t)
-            {
-                var go = new GameObject("__BeamTrigger");
-                go.layer = gameObject.layer;
-                go.transform.SetParent(transform, false);
-                _beamTriggerTf = go.transform;
-                _beamTrigger = go.AddComponent<BoxCollider>();
-                _beamTrigger.isTrigger = true;
-            }
+#if UNITY_EDITOR
+            if (!Application.isPlaying) DestroyImmediate(colliders[i]);
             else
-            {
-                _beamTriggerTf = t;
-                _beamTrigger = _beamTriggerTf.GetComponent<BoxCollider>()
-                               ?? _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
-                _beamTrigger.isTrigger = true;
-            }
+#endif
+            Destroy(colliders[i]);
         }
     }
+    _beamTrigger.isTrigger = true;
+
+#if UNITY_EDITOR
+    // 4) Strip any Missing Script components from the trigger child in the editor
+    if (!Application.isPlaying)
+    {
+        UnityEditor.GameObjectUtility.RemoveMonoBehavioursWithMissingScript(_beamTriggerTf.gameObject);
+    }
+#endif
+}
+
 
     void EnsureBeamAudio()
     {
@@ -240,7 +283,7 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
         if (glowLR) glowLR.enabled = false;
         return;
     }
-    
+
         _start = transform.position;
         var dir = transform.forward;
 
@@ -292,9 +335,7 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
         if (lethal) UpdateBeamTrigger(_start, _end, beamRadius);
         else if (_beamTrigger) _beamTrigger.enabled = false;
 
-        // -------- NEW: update hum follower ----------
         UpdateHumAudio(_start, _end);
-        // -------------------------------------------
     }
 
     void ApplyLine(LineRenderer lr, float width, Vector3 a, Vector3 b, bool caps)
@@ -388,7 +429,6 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
 
     public void SetLaser(LaserType t) { laser = t; UpdateAll(true); }
 
-    // -------- NEW: HUM LOGIC --------
     void UpdateHumAudio(Vector3 a, Vector3 b)
     {
         EnsureBeamAudio();
