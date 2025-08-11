@@ -65,7 +65,8 @@ public class HeadsetManager : MonoBehaviour
         }
         else if (headset.gameObject.name == "HMD GOLD")
         {
-            sceneSwitcher.SwitchScene("MainScene4");
+            EventManager.RoomNumber = 4;
+            sceneSwitcher.SwitchScene("MainScene");
         }
     }
 
