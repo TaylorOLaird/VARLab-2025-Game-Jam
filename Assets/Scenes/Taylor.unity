@@ -130,6 +130,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4502602028776506678, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
+      propertyPath: m_UseGravity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502602028776506678, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6280028827706199960, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -2006,6 +2014,14 @@ PrefabInstance:
       propertyPath: headsetSprite
       value: 
       objectReference: {fileID: 21300000, guid: 9bd0e8cdf61760740906c7f98240307f, type: 3}
+    - target: {fileID: 4502602028776506678, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
+      propertyPath: m_UseGravity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502602028776506678, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7184966249884574714, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
       propertyPath: m_Name
       value: HMD
@@ -2016,7 +2032,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8902551375521323615, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.898
+      value: 1.167
       objectReference: {fileID: 0}
     - target: {fileID: 8902551375521323615, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
       propertyPath: m_LocalPosition.z
