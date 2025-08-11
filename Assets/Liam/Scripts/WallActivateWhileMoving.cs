@@ -5,15 +5,32 @@ using UnityEngine;
 public class WallActivateWhileMoving : MonoBehaviour
 {
     BallBehavior ballScript;
+
+    bool isMoving;
     void Start()
     {
         ballScript = transform.parent.GetComponent<BallBehavior>();
     }
-    void OnTriggerEnter(Collider other)
+
+    void Update()
     {
-        if (other.CompareTag("Wall"))
+        isMoving = ballScript.getMoving();
+    }
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Wall") && isMoving)
         {
             ballScript.ballReset();
         }
     }
+
+    // public void setMoving(bool isMoving)
+    // {
+    //     StartCoroutine(movingDelay(isMoving));
+    // }
+    // IEnumerator movingDelay(bool isMoving)
+    // {
+    //     yield return new WaitForSeconds(0.2f);
+    //     this.isMoving = isMoving;
+    // }
 }

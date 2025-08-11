@@ -5,6 +5,15 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/ChessScene.unity
+    guid: 00dd0cd7413403248a003364ad4c1cdd
+  - enabled: 1
+    path: Assets/Jordan/Scenes/MainScene.unity
+    guid: 07c1116956f04e447bd0352973b4b27b
+  - enabled: 1
+    path: Assets/Jordan/Scenes/FirstRoom.unity
+    guid: 846aa7db4d78b2547a95fbcc3f340c13
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 17f8f9377dd1a3e41a8c2cbb8e8a4f0a
@@ -14,14 +23,11 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Jordan/Scenes/HMD.unity
     guid: d09b47c8332e8de439faced2801b6e3f
-  - enabled: 1
-    path: Assets/Berk/Scenes/BerkMainScene.unity
-    guid: b61d8110fdb6baf4685d3dc20c818e43
-  - enabled: 1
-    path: Assets/Berk/Scenes/Adventure 1.unity
-    guid: 77737491851bb6149a79e61caa752651
   - enabled: 0
-    path: Assets/Berk/Scenes/TestScene.unity
+    path: Assets/Berk/Scenes/SampleScene.unity
+    guid: b61d8110fdb6baf4685d3dc20c818e43
+  - enabled: 0
+    path: Assets/Berk/Scenes/MiniScene1.unity
     guid: 79aaea58f5d4de74490cb4dc8ae07b87
   - enabled: 0
     path: Assets/Taylor/Scenes/Lab.unity
