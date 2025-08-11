@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
 public class WaterManager : MonoBehaviour
@@ -10,18 +11,29 @@ public class WaterManager : MonoBehaviour
     [SerializeField] private Color color;
     [SerializeField] private float fogDensity;
     [SerializeField] private GameObject currents;
+    [SerializeField] private InputActionReference reset;
+    [SerializeField] private GameObject movableCube;
     private List<Transform> currentPivots;
+    private Vector3 initialPos;
 
     private void Start()
     {
         EventManager.OnHeadsetDon += HandleHeadsetDon;
         EventManager.OnHeadsetDoff += HandleHeadsetDoff;
+        reset.action.performed += OnButtonPressed;
 
         currentPivots = new List<Transform>();
         foreach (Transform child in currents.transform)
         {
             currentPivots.Add(child);
-        }    
+        }
+
+        initialPos = movableCube.transform.position;
+    }
+
+    private void OnButtonPressed(InputAction.CallbackContext context)
+    {
+        movableCube.transform.position = initialPos;
     }
 
     [ContextMenu("EnableWater")]
