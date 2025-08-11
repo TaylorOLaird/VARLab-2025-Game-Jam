@@ -133,6 +133,22 @@ public class MainGameManager : MonoBehaviour
         {
             SceneSwitcher.SwitchScene("WaterScene");
         }
+        else if (headsetName.Equals("LaserHeadset"))
+        {
+            SceneSwitcher.SwitchScene("AhmedTestScene");
+        }
+        else if(headsetName.Equals("CameraHeadset"))
+        {
+            SceneSwitcher.SwitchScene("Taylor");
+        }
+        else if (headsetName.Equals("BallHeadset"))
+        {
+            SceneSwitcher.SwitchScene("ChessScene");
+        }
+        else if (headsetName.Equals("DimensionHeadset"))
+        {
+            SceneSwitcher.SwitchScene("BerkMainScene");
+        }
     }
 
     void HandleHeadsetDoff(HMD headset)
