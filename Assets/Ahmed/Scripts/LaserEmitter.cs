@@ -44,30 +44,25 @@ public class LaserEmitter : MonoBehaviour
     [Header("Audio")]
     [Tooltip("Looping hum .wav (set to Loop in importer).")]
     public AudioClip humLoop;
-    [Tooltip("If assigned, used as player head. Otherwise we auto-find (LevelManager.xrCamera, Camera.main, or the Player-tagged rig).")]
+    [Tooltip("If assigned, used as player head.")]
     public Transform playerHead;
-    [Tooltip("Base volume far from the beam.")]
     [Range(0f, 1f)] public float humBaseVolume = 0.15f;
-    [Tooltip("Volume when very close to the beam.")]
     [Range(0f, 1f)] public float humNearVolume = 0.9f;
-    [Tooltip("Distance (m) considered 'very close'.")]
     public float humNearDistance = 0.6f;
-    [Tooltip("Max distance (m) at which the hum is audible.")]
     public float humMaxDistance = 10f;
-    [Tooltip("How snappy the audio source follows the closest point (0 = snap).")]
     [Range(0f, 1f)] public float humFollowSmoothing = 0.15f;
     public AudioClip deathSfx;
     [Range(0f, 1f)] public float deathSfxVolume = 1f;
 
     public static readonly List<LaserEmitter> All = new List<LaserEmitter>();
 
-    [SerializeField] bool _suppressed; // when true, this beam is hidden & non-lethal
+    [SerializeField] bool _suppressed;
     public LaserType ColorType => laser;
 
     struct RingSlot { public Renderer r; public int matIndex; public MaterialPropertyBlock mpb; }
 
     MaterialPropertyBlock _mpbCore, _mpbGlow;
-    List<RingSlot> _ringSlots = new();
+    readonly List<RingSlot> _ringSlots = new();
     Vector3 _start, _end;
     LaserType _lastAppliedLaser;
 
@@ -92,10 +87,11 @@ public class LaserEmitter : MonoBehaviour
     void OnEnable()
     {
         if (!All.Contains(this)) All.Add(this);
-        Ensure(allowCreate: true);      // runtime: create/attach
+        Ensure(Application.isPlaying);   // only create runtime children if actually playing
         CacheRingSlots();
         UpdateAll(true);
     }
+
     void OnDisable()
     {
         All.Remove(this);
@@ -104,14 +100,15 @@ public class LaserEmitter : MonoBehaviour
 
     void OnValidate()
     {
-        Ensure(allowCreate: false);     // editor validation: do NOT add components
+        // Editor-only: never create/destroy components here.
+        Ensure(false);
         CacheRingSlots();
         UpdateAll(true);
     }
 
-    void Update() { UpdateAll(false); }
+    void Update() => UpdateAll(false);
 
-    void Ensure(bool allowCreate)
+    void Ensure(bool allowCreateRuntimeObjects)
     {
         if (!_rb) _rb = GetComponent<Rigidbody>();
         if (_rb)
@@ -127,20 +124,20 @@ public class LaserEmitter : MonoBehaviour
         if (coreLR) coreLR.textureMode = LineTextureMode.Tile;
         if (glowLR) glowLR.textureMode = LineTextureMode.Tile;
 
-        EnsureBeamTrigger(allowCreate);
-        EnsureBeamAudio();
+        EnsureBeamTrigger(allowCreateRuntimeObjects);
+        EnsureBeamAudio(allowCreateRuntimeObjects);
     }
 
     void EnsureBeamTrigger(bool allowCreate)
     {
-        // find or (optionally) create the child
+        // Find child; only create at runtime.
         var t = transform.Find("__BeamTrigger");
         if (!t)
         {
             if (!allowCreate)
             {
                 _beamTriggerTf = null;
-                _beamTrigger = null;
+                _beamTrigger   = null;
                 return;
             }
             var go = new GameObject("__BeamTrigger");
@@ -153,35 +150,21 @@ public class LaserEmitter : MonoBehaviour
             _beamTriggerTf = t;
         }
 
-        // ensure collider (runtime only to avoid editor warnings)
-        _beamTrigger = _beamTriggerTf.GetComponent<BoxCollider>();
+        _beamTrigger = _beamTriggerTf ? _beamTriggerTf.GetComponent<BoxCollider>() : null;
         if (!_beamTrigger && allowCreate)
             _beamTrigger = _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
+
         if (_beamTrigger) _beamTrigger.isTrigger = true;
-
-        // add the relay (runtime only)
-        if (allowCreate)
-        {
-            var relay = _beamTriggerTf.GetComponent<BeamHitRelay>();
-            if (!relay) relay = _beamTriggerTf.gameObject.AddComponent<BeamHitRelay>();
-            relay.owner = this;
-        }
-
-#if UNITY_EDITOR
-        // clean up any Missing Script components in editor
-        if (!Application.isPlaying)
-            UnityEditor.GameObjectUtility.RemoveMonoBehavioursWithMissingScript(_beamTriggerTf.gameObject);
-#endif
     }
 
-
-    void EnsureBeamAudio()
+    void EnsureBeamAudio(bool allowCreate)
     {
         if (_beamAudioTf == null)
         {
             var t = transform.Find("__BeamAudio");
             if (!t)
             {
+                if (!allowCreate) { _beamAudioTf = null; _beamAudio = null; return; }
                 var go = new GameObject("__BeamAudio");
                 go.layer = gameObject.layer;
                 go.transform.SetParent(transform, false);
@@ -191,38 +174,33 @@ public class LaserEmitter : MonoBehaviour
             else
             {
                 _beamAudioTf = t;
-                _beamAudio = _beamAudioTf.GetComponent<AudioSource>() ?? _beamAudioTf.gameObject.AddComponent<AudioSource>();
+                _beamAudio = _beamAudioTf.GetComponent<AudioSource>();
+                if (_beamAudio == null && allowCreate) _beamAudio = _beamAudioTf.gameObject.AddComponent<AudioSource>();
             }
-
-            // Configure once
-            _beamAudio.playOnAwake = false;
-            _beamAudio.loop = true;
-            _beamAudio.spatialBlend = 1f;          // 3D
-            _beamAudio.dopplerLevel = 0f;          // avoid pitch shift
-            _beamAudio.spread = 0f;
-            _beamAudio.priority = 160;             // mid priority
-            _beamAudio.rolloffMode = AudioRolloffMode.Custom;
-            // Flat custom rolloff (we control volume ourselves):
-            var flat = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 1f));
-            _beamAudio.SetCustomCurve(AudioSourceCurveType.CustomRolloff, flat);
         }
 
-        // Assign clip if needed
-        if (_beamAudio && _beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
+        if (_beamAudio == null) return;
+
+        _beamAudio.playOnAwake = false;
+        _beamAudio.loop = true;
+        _beamAudio.spatialBlend = 1f;
+        _beamAudio.dopplerLevel = 0f;
+        _beamAudio.spread = 0f;
+        _beamAudio.priority = 160;
+        _beamAudio.rolloffMode = AudioRolloffMode.Custom;
+        var flat = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 1f));
+        _beamAudio.SetCustomCurve(AudioSourceCurveType.CustomRolloff, flat);
+
+        if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
     }
 
     public void SetSuppressed(bool value)
     {
         _suppressed = value;
-
-        // visuals
         if (coreLR) coreLR.enabled = !value;
         if (glowLR) glowLR.enabled = !value;
-
-        // lethal
         if (_beamTrigger) _beamTrigger.enabled = lethal && !value;
 
-        // impact fx
         if (impactDecal) impactDecal.gameObject.SetActive(!value && impactDecal.gameObject.activeSelf);
         if (impactParticles)
         {
@@ -230,7 +208,6 @@ public class LaserEmitter : MonoBehaviour
             else if (!value && !impactParticles.isPlaying) impactParticles.Play();
         }
 
-        // hum
         if (_beamAudio)
         {
             if (value && _beamAudio.isPlaying) _beamAudio.Stop();
@@ -267,7 +244,6 @@ public class LaserEmitter : MonoBehaviour
     {
         if (_suppressed)
         {
-            // keep trigger off & lines off while suppressed
             if (_beamTrigger) _beamTrigger.enabled = false;
             if (coreLR) coreLR.enabled = false;
             if (glowLR) glowLR.enabled = false;
@@ -280,11 +256,15 @@ public class LaserEmitter : MonoBehaviour
         if (Physics.Raycast(_start, dir, out var hit, maxDistance, hitMask, QueryTriggerInteraction.Ignore))
         {
             _end = hit.point;
-            if (impactDecal) { impactDecal.gameObject.SetActive(true); impactDecal.SetPositionAndRotation(hit.point, Quaternion.LookRotation(hit.normal)); }
+            if (impactDecal)
+            {
+                impactDecal.gameObject.SetActive(true);
+                impactDecal.SetPositionAndRotation(hit.point, Quaternion.LookRotation(hit.normal));
+            }
             if (impactParticles)
             {
                 impactParticles.transform.SetPositionAndRotation(hit.point, Quaternion.LookRotation(hit.normal));
-                if (!impactParticles.isPlaying) impactParticles.Play();
+                if (Application.isPlaying && !impactParticles.isPlaying) impactParticles.Play();
             }
         }
         else
@@ -294,19 +274,17 @@ public class LaserEmitter : MonoBehaviour
             if (impactParticles && impactParticles.isPlaying) impactParticles.Stop();
         }
 
-        // subtle width shimmer
         float f = 1f + ((flicker > 0f) ? (Mathf.PerlinNoise(Time.time * 3.1f, 0f) - 0.5f) * 2f * flicker : 0f);
         float coreW = Mathf.Max(0.0005f, coreWidth * f);
         float glowW = coreW * glowWidthMultiplier;
         ApplyLine(coreLR, coreW, _start, _end, true);
         ApplyLine(glowLR, glowW, _start, _end, false);
 
-        // ACES-friendly primaries
         Color baseCol = laser switch
         {
             LaserType.Green => new Color(0.00f, 0.90f, 0.15f, 1f),
-            LaserType.Blue => new Color(0.10f, 0.30f, 1.00f, 1f),
-            _ => new Color(1.00f, 0.05f, 0.02f, 1f),
+            LaserType.Blue  => new Color(0.10f, 0.30f, 1.00f, 1f),
+            _               => new Color(1.00f, 0.05f, 0.02f, 1f),
         };
 
         Color coreCol = Color.Lerp(baseCol, Color.white, 0.35f) * coreIntensity;
@@ -320,6 +298,14 @@ public class LaserEmitter : MonoBehaviour
         {
             SetRingPerInstance(baseCol, ringEmission);
             _lastAppliedLaser = laser;
+        }
+
+        // Editor preview: visuals only; no trigger/audio churn.
+        if (!Application.isPlaying)
+        {
+            if (_beamTrigger) _beamTrigger.enabled = false;
+            if (_beamAudio && _beamAudio.isPlaying) _beamAudio.Stop();
+            return;
         }
 
         if (lethal) UpdateBeamTrigger(_start, _end, beamRadius);
@@ -372,102 +358,86 @@ public class LaserEmitter : MonoBehaviour
     }
 
     // --- LETHAL TRIGGER ---
-   void UpdateBeamTrigger(Vector3 a, Vector3 b, float radius)
-{
-    // Only create/attach the child trigger at runtime (prevents editor spam)
-    EnsureBeamTrigger(Application.isPlaying);
-    if (!_beamTriggerTf || !_beamTrigger) return;
-
-    _beamTrigger.enabled = true;
-
-    Vector3 mid = (a + b) * 0.5f;
-    Vector3 dir = (b - a);
-    float len = Mathf.Max(0.001f, dir.magnitude);
-
-    // Guard against zero-length to avoid LookRotation errors
-    var rot = (len > 0.0001f) ? Quaternion.LookRotation(dir.normalized, Vector3.up) : _beamTriggerTf.rotation;
-
-    _beamTriggerTf.SetPositionAndRotation(mid, rot);
-    _beamTrigger.size = new Vector3(Mathf.Max(0.001f, radius * 2f),
-                                    Mathf.Max(0.001f, radius * 2f),
-                                    len);
-    _beamTrigger.center = Vector3.zero;
-}
-
-
-   internal void OnBeamTriggerTouched(Collider other)
-{
-    if (!lethal || other == null) return;
-
-    // Early out if the root isn’t on PlayerRig layer (prevents mis-tagged objects)
-    int playerLayer = LayerMask.NameToLayer("PlayerRig");
-    if (playerLayer != -1 && other.transform.root.gameObject.layer != playerLayer) return;
-
-    var root = other.transform.root;
-    if (!root.CompareTag(playerTag)) return;
-
-    var lm = LevelManager.Instance;
-    if (lm != null && !lm.IsRespawning)
+    void UpdateBeamTrigger(Vector3 a, Vector3 b, float radius)
     {
-        if (deathSfx)
-        {
-            Vector3 sfxPos = (playerHead != null) ? playerHead.position : root.position;
-            AudioSource.PlayClipAtPoint(deathSfx, sfxPos, Mathf.Clamp01(deathSfxVolume));
-        }
-        lm.KillPlayer(root);
-    }
-}
+        // Create/find at runtime only.
+        EnsureBeamTrigger(Application.isPlaying);
+        if (!_beamTriggerTf || !_beamTrigger) return;
 
+        _beamTrigger.enabled = true;
+
+        Vector3 mid = (a + b) * 0.5f;
+        Vector3 dir = (b - a);
+        float len = Mathf.Max(0.001f, dir.magnitude);
+
+        var rot = (len > 0.0001f) ? Quaternion.LookRotation(dir.normalized, Vector3.up) : _beamTriggerTf.rotation;
+
+        _beamTriggerTf.SetPositionAndRotation(mid, rot);
+        _beamTrigger.size = new Vector3(Mathf.Max(0.001f, radius * 2f),
+                                        Mathf.Max(0.001f, radius * 2f),
+                                        len);
+        _beamTrigger.center = Vector3.zero;
+    }
+
+    // Receive trigger callbacks on the parent Rigidbody (no child relay script needed)
+    void OnTriggerEnter(Collider other)  => OnBeamTriggerTouched(other);
+    void OnTriggerStay(Collider other)   => OnBeamTriggerTouched(other);
+
+    internal void OnBeamTriggerTouched(Collider other)
+    {
+        if (!Application.isPlaying || !lethal || other == null) return;
+
+        int playerLayer = LayerMask.NameToLayer("PlayerRig");
+        if (playerLayer != -1 && other.transform.root.gameObject.layer != playerLayer) return;
+
+        var root = other.transform.root;
+        if (!root.CompareTag(playerTag)) return;
+
+        var lm = LevelManager.Instance;
+        if (lm != null && !lm.IsRespawning)
+        {
+            if (deathSfx)
+            {
+                Vector3 sfxPos = (playerHead != null) ? playerHead.position : root.position;
+                AudioSource.PlayClipAtPoint(deathSfx, sfxPos, Mathf.Clamp01(deathSfxVolume));
+            }
+            lm.KillPlayer(root);
+        }
+    }
 
     public void SetLaser(LaserType t) { laser = t; UpdateAll(true); }
 
     void UpdateHumAudio(Vector3 a, Vector3 b)
     {
-        EnsureBeamAudio();
+        EnsureBeamAudio(true); // runtime only
         if (_beamAudio == null) return;
 
-        // no audio in edit mode, avoid play-in-editor noise
-        if (!Application.isPlaying) { if (_beamAudio.isPlaying) _beamAudio.Stop(); return; }
-
-        // nothing to play?
         if (humLoop == null || humMaxDistance <= 0f)
         {
             if (_beamAudio.isPlaying) _beamAudio.Stop();
             return;
         }
-
-        if (this.playerHead == null)
+        if (playerHead == null)
         {
             if (_beamAudio.isPlaying) _beamAudio.Stop();
             return;
         }
 
-        // Closest point on beam segment to player head
         Vector3 ab = b - a;
         float abLenSq = Mathf.Max(1e-6f, ab.sqrMagnitude);
-        float t = Vector3.Dot(this.playerHead.position - a, ab) / abLenSq;
+        float t = Vector3.Dot(playerHead.position - a, ab) / abLenSq;
         t = Mathf.Clamp01(t);
         Vector3 closest = a + ab * t;
 
-        // Smooth follow
         if (humFollowSmoothing <= 0f) _beamAudioTf.position = closest;
-        else _beamAudioTf.position = Vector3.Lerp(_beamAudioTf.position, closest, 1f - Mathf.Pow(1f - humFollowSmoothing, Application.isPlaying ? Time.deltaTime * 60f : 1f));
+        else _beamAudioTf.position = Vector3.Lerp(_beamAudioTf.position, closest, 1f - Mathf.Pow(1f - humFollowSmoothing, Time.deltaTime * 60f));
 
-        // Our own distance-based loudness curve
-        float d = Vector3.Distance(this.playerHead.position, closest);
+        float d = Vector3.Distance(playerHead.position, closest);
         float k = Mathf.InverseLerp(humMaxDistance, humNearDistance, d); // 0 far, 1 near
         float vol = Mathf.Lerp(humBaseVolume, humNearVolume, k);
         _beamAudio.volume = vol;
 
-        // ensure clip and play
         if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
         if (!_beamAudio.isPlaying) _beamAudio.Play();
     }
-
-    private class BeamHitRelay : MonoBehaviour
-{
-    [HideInInspector] public LaserEmitter owner;
-    void OnTriggerEnter(Collider other) => owner?.OnBeamTriggerTouched(other);
-    void OnTriggerStay(Collider other)  => owner?.OnBeamTriggerTouched(other);
-}
 }
