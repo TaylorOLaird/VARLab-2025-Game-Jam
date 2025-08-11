@@ -5,6 +5,8 @@ public static class EventManager
 {
     public static event Action<HMD> OnHeadsetDon;
     public static event Action<HMD> OnHeadsetDoff;
+    public static event Action<string> OnSpeak;
+    public static int RoomNumber = 0;
 
     public static void HeadsetDon(HMD headset)
     {
@@ -15,4 +17,8 @@ public static class EventManager
         OnHeadsetDoff?.Invoke(headset);
     }
 
+    public static void Speak(string text)
+    {
+        OnSpeak?.Invoke(text);
+    }
 }
