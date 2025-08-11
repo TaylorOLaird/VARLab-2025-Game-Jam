@@ -129,6 +129,10 @@ public class MainGameManager : MonoBehaviour
             }
                 
         }
+        else if (headsetName.Equals("WaterHeadset"))
+        {
+            SceneSwitcher.SwitchScene("WaterScene");
+        }
     }
 
     void HandleHeadsetDoff(HMD headset)
