@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(BoxCollider))] // solid collider (NOT trigger)
+[RequireComponent(typeof(BoxCollider))]
 public class MovingPlatform : MonoBehaviour
 {
     [Header("Path")]
@@ -87,8 +87,11 @@ public class MovingPlatform : MonoBehaviour
 
         ResolveSolidCollider();
         if (!Application.isPlaying && autoTopTrigger) EnsureTopTrigger();
-        if (!Application.isPlaying && pathLineAlwaysUpdateInEditor) { BuildPath(); SetupPathLine(); }
+
+        BuildPath();
+
     }
+
 
     void ResolveSolidCollider()
     {
@@ -138,53 +141,51 @@ public class MovingPlatform : MonoBehaviour
             center.z
         );
     }
-
     void SetupPathLine()
-{
-    if (!showPathLine)
     {
-        if (_pathLR) _pathLR.enabled = false;
-        return;
+        if (!showPathLine)
+        {
+            if (_pathLR) _pathLR.enabled = false;
+            return;
+        }
+
+        // Do NOT add components in edit mode
+        if (_pathLR == null)
+        {
+            if (!Application.isPlaying) return;
+
+            var go = new GameObject("__PathLine");
+            go.transform.SetParent(transform, worldPositionStays: false);
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
+
+            _pathLR = go.AddComponent<LineRenderer>();
+            _pathLR.useWorldSpace = true;
+            _pathLR.textureMode = LineTextureMode.Stretch;
+            _pathLR.alignment = LineAlignment.View;
+            _pathLR.numCapVertices = 4;
+            _pathLR.numCornerVertices = 2;
+
+            var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (!sh) sh = Shader.Find("Sprites/Default");
+            var mat = new Material(sh) { name = "__PathLine_Mat" };
+            _pathLR.sharedMaterial = mat;
+        }
+
+        _pathLR.enabled = true;
+        _pathLR.startWidth = _pathLR.endWidth = pathLineWidth;
+
+        var grad = new Gradient();
+        grad.SetKeys(
+            new[] { new GradientColorKey(pathLineColor, 0f), new GradientColorKey(pathLineColor, 1f) },
+            new[] { new GradientAlphaKey(pathLineColor.a, 0f), new GradientAlphaKey(pathLineColor.a, 1f) }
+        );
+        _pathLR.colorGradient = grad;
+
+        _pathLR.positionCount = _path.Count;
+        for (int i = 0; i < _path.Count; i++)
+            _pathLR.SetPosition(i, _path[i]);
     }
-
-    if (_pathLR == null)
-    {
-        var go = new GameObject("__PathLine");
-        go.transform.SetParent(transform, worldPositionStays: false);
-        go.transform.localPosition = Vector3.zero;
-        go.transform.localRotation = Quaternion.identity;
-
-        _pathLR = go.AddComponent<LineRenderer>();
-        _pathLR.useWorldSpace = true;
-        _pathLR.textureMode = LineTextureMode.Stretch;
-        _pathLR.alignment = LineAlignment.View;
-        _pathLR.numCapVertices = 4;
-        _pathLR.numCornerVertices = 2;
-        
-        var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-        if (!sh) sh = Shader.Find("Sprites/Default");
-
-        // Assign via sharedMaterial to avoid instantiation/leaks in edit mode
-        var mat = new Material(sh) { name = "__PathLine_Mat" };
-        _pathLR.sharedMaterial = mat;
-    }
-
-    _pathLR.enabled = true;
-    _pathLR.startWidth = _pathLR.endWidth = pathLineWidth;
-
-    var grad = new Gradient();
-    grad.SetKeys(
-        new[] { new GradientColorKey(pathLineColor, 0f), new GradientColorKey(pathLineColor, 1f) },
-        new[] { new GradientAlphaKey(pathLineColor.a, 0f), new GradientAlphaKey(pathLineColor.a, 1f) }
-    );
-    _pathLR.colorGradient = grad;
-
-    // Set points: start + checkpoints
-    _pathLR.positionCount = _path.Count;
-    for (int i = 0; i < _path.Count; i++)
-        _pathLR.SetPosition(i, _path[i]);
-}
-
 
     void FixedUpdate()
     {
