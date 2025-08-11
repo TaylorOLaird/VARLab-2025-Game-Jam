@@ -78,6 +78,8 @@ public class TaylorLevelManager : MonoBehaviour
             Debug.Log("Final headset");
             EventManager.RoomNumber = 5;
             SceneSwitcher sceneSwitcherScript = sceneSwitcher.GetComponent<SceneSwitcher>();
+            SceneManager.UnloadSceneAsync("Assets/Taylor/Scenes/Lab.unity");
+            SceneManager.UnloadSceneAsync("Assets/Taylor/Scenes/Old.unity");
             sceneSwitcherScript.SwitchScene("MainScene");
         }
 
