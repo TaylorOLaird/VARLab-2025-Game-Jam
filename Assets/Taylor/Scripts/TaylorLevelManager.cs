@@ -15,6 +15,9 @@ public class TaylorLevelManager : MonoBehaviour
     [SerializeField] private List<GameObject> objectsToSwitch;
     [SerializeField] private GameObject finalHMD;
     [SerializeField] private GameObject finalStump;
+    [SerializeField] private GameObject sceneSwitcher;
+
+    // 5
 
     private string currentRelmName = "Lab";
     private int FlashDuration = 0;
@@ -69,6 +72,15 @@ public class TaylorLevelManager : MonoBehaviour
 
     public void addHeadset(HMD headset)
     {
+        // check if headset game object name is "EndHeadset"
+        if (headset.gameObject.name == "EndHeadset")
+        {
+            Debug.Log("Final headset");
+            EventManager.RoomNumber = 5;
+            SceneSwitcher sceneSwitcherScript = sceneSwitcher.GetComponent<SceneSwitcher>();
+            sceneSwitcherScript.SwitchScene("MainScene");
+        }
+
         Debug.Log("Headset added - B&W enabled");
         volume.weight = 1f;
         SceneManager.LoadSceneAsync("Assets/Taylor/Scenes/Old.unity", LoadSceneMode.Additive);
