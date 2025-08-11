@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 
 public class HeadsetManager : MonoBehaviour
 {
+    [SerializeField] SceneSwitcher sceneSwitcher;
     [SerializeField] private Volume redVolume;
 
     [SerializeField] private Volume blueVolume;
@@ -62,6 +63,10 @@ public class HeadsetManager : MonoBehaviour
         {
             headsetList.Add(4);
         }
+        else if (headset.gameObject.name == "HMD GOLD")
+        {
+            sceneSwitcher.SwitchScene("MainScene4");
+        }
     }
 
     public void removeHeadset(HMD headset)
@@ -81,6 +86,10 @@ public class HeadsetManager : MonoBehaviour
         else if (headset.gameObject.name == "HMD BLACK")
         {
             headsetList.Remove(4);
+        }
+        else if (headset.gameObject.name == "HMD GOLD")
+        {
+            // Nothing
         }
     }
 
