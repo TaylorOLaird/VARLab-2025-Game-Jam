@@ -2536,7 +2536,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6776,6 +6776,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 914868220845da0469a2a6bcd4e80e87, type: 3}
+--- !u!114 &837506066 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1708837157364082518, guid: 914868220845da0469a2a6bcd4e80e87, type: 3}
+  m_PrefabInstance: {fileID: 837506065}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34b2b1a756ae24d4290fea8ca1568d1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &887254786
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9948,6 +9959,51 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &1377036666
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1377036668}
+  - component: {fileID: 1377036667}
+  m_Layer: 0
+  m_Name: SkyboxToggler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1377036667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377036666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd14676b4020404e996535d7d795c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultSkybox: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+--- !u!4 &1377036668
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377036666}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 14.514586, y: -1.2967345, z: 5.6451583}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1409588920
 GameObject:
   m_ObjectHideFlags: 0
@@ -12837,7 +12893,8 @@ MonoBehaviour:
   currents: {fileID: 1696195984}
   reset: {fileID: -4307802298774619270, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   movableCube: {fileID: 1739443716}
-  sceneSwitcher: {fileID: 0}
+  sceneSwitcher: {fileID: 837506066}
+  skyboxToggler: {fileID: 1377036667}
 --- !u!4 &1850518174
 Transform:
   m_ObjectHideFlags: 0
@@ -15312,15 +15369,16 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 296371723}
   - {fileID: 441087506}
   - {fileID: 1805962748}
   - {fileID: 2006967854}
   - {fileID: 837506065}
+  - {fileID: 1377036668}
   - {fileID: 1850518174}
   - {fileID: 756192408}
   - {fileID: 2092139010}
   - {fileID: 659958347}
-  - {fileID: 296371723}
   - {fileID: 1409588921}
   - {fileID: 887254786}
   - {fileID: 2000842802}

@@ -12,6 +12,7 @@ public class WaterManager : MonoBehaviour
     [SerializeField] private InputActionReference reset;
     [SerializeField] private GameObject movableCube;
     [SerializeField] private SceneSwitcher sceneSwitcher;
+    [SerializeField] private SkyboxToggler skyboxToggler;
     private List<Transform> currentPivots;
     private Vector3 initialPos;
 
@@ -38,6 +39,7 @@ public class WaterManager : MonoBehaviour
     [ContextMenu("EnableWater")]
     public void EnableWater()
     {
+        skyboxToggler.DisableSkybox();
         volume.enabled = true;
         WaterSceneState.IsWaterEnabled = true;
     }
@@ -45,6 +47,7 @@ public class WaterManager : MonoBehaviour
     [ContextMenu("DisableWater")]
     public void DisableWater()
     {
+        skyboxToggler.EnableSkybox();
         volume.enabled = false;
         WaterSceneState.IsWaterEnabled = false;
     }
@@ -84,9 +87,9 @@ public class WaterManager : MonoBehaviour
         }
         if (headset.gameObject.name == "HMDEnd")
         {
-            Debug.Log("return to main scene");
+            EventManager.RoomNumber = 3;
+            sceneSwitcher.SwitchScene("MainScene");
         }
-        
     }
 
     public void HandleHeadsetDoff(HMD headset)
@@ -98,10 +101,6 @@ public class WaterManager : MonoBehaviour
         else if (headset.gameObject.name == "HMDCurrentFlow")
         {
             RestoreCurrents();
-        }
-        if (headset.gameObject.name == "HMDEnd")
-        {
-            Debug.Log("return to main scene");
         }
     }
 }
