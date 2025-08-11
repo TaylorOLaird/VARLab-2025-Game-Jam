@@ -26,9 +26,6 @@ public class CrystalPedestal : MonoBehaviour
     [Tooltip("Effect GameObject to enable when crystal placed (particles, lights).")]
     public GameObject effectObject;
 
-    [Tooltip("Optional sound to play on accept (AudioSource on pedestal will be used).")]
-    public AudioClip acceptSfx;
-
     [Header("Events")]
     public UnityEvent onAccepted;
 
@@ -160,11 +157,9 @@ public class CrystalPedestal : MonoBehaviour
         }
 
         // optional sfx
-        if (acceptSfx != null)
+        if (AudioManager.Instance != null)
         {
-            var src = GetComponent<AudioSource>();
-            if (src == null) src = gameObject.AddComponent<AudioSource>();
-            src.PlayOneShot(acceptSfx);
+            AudioManager.Instance.PlayOneShot("magic");
         }
 
         // callback

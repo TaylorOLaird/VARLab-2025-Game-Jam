@@ -71,7 +71,13 @@ public class HMDManager : MonoBehaviour
         // Get the GameObject that was slotted
         GameObject slottedObject = args.interactableObject.transform.gameObject;
 
-        if(slottedObject.GetComponent<HMD>() == null)
+        if (slottedObject.name.Equals("LastttHeadset"))
+        {
+            EventManager.HeadsetDon(slottedObject.GetComponent<HMD>());
+            return;
+        }
+
+        if (slottedObject.GetComponent<HMD>() == null)
         {
             Debug.LogWarning("The slotted object does not have an HMD component.");
             return;
