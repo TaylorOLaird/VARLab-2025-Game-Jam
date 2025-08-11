@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 
 public class HeadsetManager : MonoBehaviour
 {
+    [SerializeField] SceneSwitcher sceneSwitcher;
     [SerializeField] private Volume redVolume;
 
     [SerializeField] private Volume blueVolume;
@@ -26,11 +27,7 @@ public class HeadsetManager : MonoBehaviour
 
     [SerializeField] GameObject greenWallsTransparent;
 
-    [SerializeField] GameObject redWallsTransparentCollisions;
-
-    [SerializeField] GameObject blueWallsTransparentCollisions;
-
-    [SerializeField] GameObject greenWallsTransparentCollisions;
+    [SerializeField] GameObject allTransparentCollisions;
 
 
     List<int> headsetList;
@@ -64,7 +61,12 @@ public class HeadsetManager : MonoBehaviour
         }
         else if (headset.gameObject.name == "HMD BLACK")
         {
-            headsetList.Remove(4);
+            headsetList.Add(4);
+        }
+        else if (headset.gameObject.name == "HMD GOLD")
+        {
+            EventManager.RoomNumber = 4;
+            sceneSwitcher.SwitchScene("MainScene");
         }
     }
 
@@ -86,6 +88,10 @@ public class HeadsetManager : MonoBehaviour
         {
             headsetList.Remove(4);
         }
+        else if (headset.gameObject.name == "HMD GOLD")
+        {
+            // Nothing
+        }
     }
 
     void currentEffect()
@@ -98,9 +104,7 @@ public class HeadsetManager : MonoBehaviour
             redWallsTransparent.SetActive(false);
             blueWallsTransparent.SetActive(false);
             greenWallsTransparent.SetActive(false);
-            redWallsTransparentCollisions.SetActive(false);
-            blueWallsTransparentCollisions.SetActive(false);
-            greenWallsTransparentCollisions.SetActive(false);
+            allTransparentCollisions.SetActive(false);
             redVolume.weight = 0;
             blueVolume.weight = 0;
             greenVolume.weight = 0;
@@ -110,12 +114,10 @@ public class HeadsetManager : MonoBehaviour
             redWalls.SetActive(false);
             blueWalls.SetActive(true);
             greenWalls.SetActive(true);
-            redWallsTransparent.SetActive(false);
-            blueWallsTransparent.SetActive(true);
+            redWallsTransparent.SetActive(true);
+            blueWallsTransparent.SetActive(false);
             greenWallsTransparent.SetActive(false);
-            redWallsTransparentCollisions.SetActive(false);
-            blueWallsTransparentCollisions.SetActive(false);
-            greenWallsTransparentCollisions.SetActive(false);
+            allTransparentCollisions.SetActive(false);
             redVolume.weight = 1;
             blueVolume.weight = 0;
             greenVolume.weight = 0;
@@ -128,9 +130,7 @@ public class HeadsetManager : MonoBehaviour
             redWallsTransparent.SetActive(false);
             blueWallsTransparent.SetActive(true);
             greenWallsTransparent.SetActive(false);
-            redWallsTransparentCollisions.SetActive(false);
-            blueWallsTransparentCollisions.SetActive(true);
-            greenWallsTransparentCollisions.SetActive(false);
+            allTransparentCollisions.SetActive(false);
             redVolume.weight = 0;
             blueVolume.weight = 1;
             greenVolume.weight = 0;
@@ -143,9 +143,7 @@ public class HeadsetManager : MonoBehaviour
             redWallsTransparent.SetActive(false);
             blueWallsTransparent.SetActive(false);
             greenWallsTransparent.SetActive(true);
-            redWallsTransparentCollisions.SetActive(false);
-            blueWallsTransparentCollisions.SetActive(false);
-            greenWallsTransparentCollisions.SetActive(false);
+            allTransparentCollisions.SetActive(false);
             redVolume.weight = 0;
             blueVolume.weight = 0;
             greenVolume.weight = 1;
@@ -158,9 +156,7 @@ public class HeadsetManager : MonoBehaviour
             redWallsTransparent.SetActive(false);
             blueWallsTransparent.SetActive(false);
             greenWallsTransparent.SetActive(false);
-            redWallsTransparentCollisions.SetActive(true);
-            blueWallsTransparentCollisions.SetActive(true);
-            greenWallsTransparentCollisions.SetActive(true);
+            allTransparentCollisions.SetActive(true);
             redVolume.weight = 0;
             blueVolume.weight = 0;
             greenVolume.weight = 0;

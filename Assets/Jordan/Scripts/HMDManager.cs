@@ -50,7 +50,7 @@ public class HMDManager : MonoBehaviour
             if (HMDDoffHitbox.transform.localPosition != Vector3.zero)
             {
                 HMDDoffHitbox.transform.localPosition = Vector3.zero;
-                
+
             }
         }
     }
@@ -71,7 +71,13 @@ public class HMDManager : MonoBehaviour
         // Get the GameObject that was slotted
         GameObject slottedObject = args.interactableObject.transform.gameObject;
 
-        if(slottedObject.GetComponent<HMD>() == null)
+        if (slottedObject.name.Equals("LastttHeadset"))
+        {
+            EventManager.HeadsetDon(slottedObject.GetComponent<HMD>());
+            return;
+        }
+
+        if (slottedObject.GetComponent<HMD>() == null)
         {
             Debug.LogWarning("The slotted object does not have an HMD component.");
             return;
@@ -111,7 +117,7 @@ public class HMDManager : MonoBehaviour
             Debug.LogWarning("Interactor or headset is null during doff process.");
             return;
         }
-            
+
         var manager = handInteractor.interactionManager;
         if (manager == null)
         {

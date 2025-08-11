@@ -42,7 +42,7 @@ public class FirstRoomGameManager : MonoBehaviour
         }
         else if (headset.gameObject.name.Equals("EndHeadset"))
         {
-            EventManager.RoomNumber = 6;
+            EventManager.RoomNumber = 1;
             sceneSwitcher.SwitchScene("MainScene");
         }
     }

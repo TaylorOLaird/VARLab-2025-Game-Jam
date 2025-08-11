@@ -1,14 +1,32 @@
+using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainGameManager : MonoBehaviour
 {
     public SceneSwitcher SceneSwitcher;
+    public EndSwitcher EndSwitcher;
     public GameObject Headsets;
     public GameObject HiddenPuzzle;
     public GameObject Anchors;
     public GameObject FinishColliderSpeakers;
     public GameObject HiddenPuzzleSpeakers;
+    public List<string> HeadsetNames;
+
+    public List<string> board1 = new List<string> { "WaterHeadset", "BallHeadset", "DimensionHeadset" };
+    public List<string> board2 = new List<string> { "LaserHeadset", "CameraHeadset", "BallHeadset" };
+    public List<string> board3 = new List<string> { "DimensionHeadset", "WaterHeadset", "LaserHeadset" };
+
+    public Image board1Panel;
+    public Image board2Panel;
+    public Image board3Panel;
+
+    public bool board1Solved = false;
+    public bool board2Solved = false;
+    public bool board3Solved = false;
+
+    public GameObject Door;
 
     private XROrigin xrOrigin;
 
@@ -47,7 +65,52 @@ public class MainGameManager : MonoBehaviour
 
     void HandleHeadsetDon(HMD headset)
     {
-        if(headset.gameObject.name.Equals("StartHeadset"))
+        string headsetName = headset.gameObject.name;
+        HeadsetNames.Add(headsetName);
+
+        int board1index = 0;
+        int board2index = 0;
+        int board3index = 0;
+        for (int i = 0; i < HeadsetNames.Count; i++)
+        {
+            if (board1[board1index].Equals(HeadsetNames[i]))
+            {
+                board1index++;
+            }
+            if (board2[board2index].Equals(HeadsetNames[i]))
+            {
+                board2index++;
+            }
+            if (board3[board3index].Equals(HeadsetNames[i]))
+            {
+                board3index++;
+            }
+        }
+        if(board1index == board1.Count && !board1Solved)
+        {
+            board1Solved = true;
+            board1Panel.color = Color.green;
+        }
+        if (board2index == board2.Count && !board2Solved)
+        {
+            board2Solved = true;
+            board2Panel.color = Color.green;
+        }
+        if (board3index == board3.Count && !board3Solved)
+        {
+            board3Solved = true;
+            board3Panel.color = Color.green;
+        }
+        if (board1Solved && board2Solved && board3Solved)
+        {
+            Door.SetActive(false);
+            return;
+        }
+        if (headsetName.Equals("LastttHeadset"))
+        {
+            EndSwitcher.End();
+        }
+        if (headsetName.Equals("StartHeadset"))
         {
             if(EventManager.RoomNumber > 0)
             {
@@ -66,10 +129,31 @@ public class MainGameManager : MonoBehaviour
             }
                 
         }
+        else if (headsetName.Equals("WaterHeadset"))
+        {
+            SceneSwitcher.SwitchScene("WaterScene");
+        }
+        else if (headsetName.Equals("LaserHeadset"))
+        {
+            SceneSwitcher.SwitchScene("AhmedTestScene");
+        }
+        else if(headsetName.Equals("CameraHeadset"))
+        {
+            SceneSwitcher.SwitchScene("Taylor");
+        }
+        else if (headsetName.Equals("BallHeadset"))
+        {
+            SceneSwitcher.SwitchScene("ChessScene");
+        }
+        else if (headsetName.Equals("DimensionHeadset"))
+        {
+            SceneSwitcher.SwitchScene("BerkMainScene");
+        }
     }
 
     void HandleHeadsetDoff(HMD headset)
     {
+        HeadsetNames.RemoveAt(HeadsetNames.Count - 1);
         if (headset.gameObject.name.Equals("StartHeadset"))
         {
             if (EventManager.RoomNumber > 0)
