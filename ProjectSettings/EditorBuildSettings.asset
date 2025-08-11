@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Jordan/Scenes/MainScene.unity
     guid: 07c1116956f04e447bd0352973b4b27b
   - enabled: 0
