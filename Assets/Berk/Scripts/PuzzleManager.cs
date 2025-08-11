@@ -80,6 +80,10 @@ public class PuzzleManager : MonoBehaviour
 
         Debug.Log("[PuzzleManager] All crystals placed — triggering finale.");
 
+        EventManager.RoomNumber = 7;
+
+        EventManager.Speak($"You won.");
+
         // Animator trigger
         if (sceneAnimator != null && !string.IsNullOrEmpty(animatorTriggerName))
         {
