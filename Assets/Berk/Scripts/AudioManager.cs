@@ -25,7 +25,7 @@ public class AudioManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        // DontDestroyOnLoad(gameObject);
 
         // create sources if missing
         if (ambientSource == null) ambientSource = gameObject.AddComponent<AudioSource>();
