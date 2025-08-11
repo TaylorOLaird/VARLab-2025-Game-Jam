@@ -18,9 +18,18 @@ public class WearableHeadsetPersistent : MonoBehaviour
     public XRSocketInteractor headSocket;               // assign your HeadSocket (child of Camera)
     public XRGrabInteractable grabInteractable;        // will auto-assign if null
 
+    [Header("Unwear control")]
+    [Tooltip("If false, attempting to remove the headset will be prevented.")]
+    public bool canUnwear = true;
+
+    [Tooltip("Transform to snap headset to when forcibly reattaching (usually a child of the player camera).")]
+    public Transform headAttachPoint;
+
+
     [Header("Effects")]
     public Volume postProcessVolume;                   // optional: set weight to 1 when worn, 0 when off
     public List<GameObject> objectsToEnableOnWear;     // Other scene objects to enable/disable
+    public List<GameObject> objectsToDisableOnWear;     // Other scene objects to enable/disable
 
     [Header("Scene / behaviour")]
 #if UNITY_EDITOR
@@ -28,6 +37,14 @@ public class WearableHeadsetPersistent : MonoBehaviour
 #endif
     [Tooltip("Name of scene in Build Settings. Will be filled from SceneAsset if assigned in editor.")]
     public string dimensionSceneName;
+
+    [Header("Scene / behaviour")]
+#if UNITY_EDITOR
+    public SceneAsset finalSceneAsset;             // editor-only friendly assignment
+#endif
+    [Tooltip("Name of scene in Build Settings. Will be filled from SceneAsset if assigned in editor.")]
+    public string finalSceneName;
+
     public bool loadSceneAdditively = true;
     public bool unloadSceneOnUnwear = true;
 
@@ -67,6 +84,8 @@ public class WearableHeadsetPersistent : MonoBehaviour
 #if UNITY_EDITOR
         if (dimensionSceneAsset != null)
             dimensionSceneName = dimensionSceneAsset.name;
+        if (finalSceneAsset != null)
+            finalSceneName = finalSceneAsset.name;
 #endif
     }
 
@@ -93,18 +112,51 @@ public class WearableHeadsetPersistent : MonoBehaviour
     }
 
     // These are select events for the headset itself (grabbed/worn via socket).
+
     void OnSelectEntered(SelectEnterEventArgs args)
     {
+        // If the head socket put it on, allow wearing
         if (args.interactorObject is XRSocketInteractor socket && socket == headSocket)
         {
             Wear();
+            return;
+        }
+
+        // It's a controller / other interactor trying to grab the headset.
+        // Block grabs when canUnwear is false by forcing SelectExit using the manager (new IXR API).
+        if (!canUnwear)
+        {
+            // Try to cancel selection through the interaction manager using the IXR interfaces
+            var manager = grabInteractable.interactionManager;
+
+            var ixrInteractor = args.interactorObject as IXRSelectInteractor;
+            var ixrInteractable = args.interactableObject as IXRSelectInteractable;
+
+            if (manager != null && ixrInteractor != null && ixrInteractable != null)
+            {
+                manager.SelectExit(ixrInteractor, ixrInteractable);
+                Debug.Log("[WearableHeadsetPersistent] Blocked controller grab via SelectExit (IXR).");
+            }
+            else
+            {
+                Debug.LogWarning("[WearableHeadsetPersistent] Blocking grab fallback: reattaching next frame.");
+            }
+
+            return;
         }
     }
 
     void OnSelectExited(SelectExitEventArgs args)
     {
+        // Only care if the head socket deselected us
         if (args.interactorObject is XRSocketInteractor socket && socket == headSocket)
         {
+            if (!canUnwear)
+            {
+                return;
+            }
+
+            // allowed -> perform normal unwear
             Unwear();
         }
     }
@@ -114,9 +166,15 @@ public class WearableHeadsetPersistent : MonoBehaviour
         if (_isWorn) return;
         _isWorn = true;
 
+        if (gameObject.name == "FinalHeadset")
+        {
+            SceneManager.LoadSceneAsync(finalSceneName);
+        }
+
         if (postProcessVolume != null) postProcessVolume.weight = 1f;
 
         foreach (var go in objectsToEnableOnWear) if (go) go.SetActive(true);
+        foreach (var go in objectsToDisableOnWear) if (go) go.SetActive(false);
 
         if (!string.IsNullOrEmpty(dimensionSceneName) && loadSceneAdditively)
         {
@@ -148,6 +206,7 @@ public class WearableHeadsetPersistent : MonoBehaviour
 
         if (postProcessVolume != null) postProcessVolume.weight = 0f;
         foreach (var go in objectsToEnableOnWear) if (go) go.SetActive(false);
+        foreach (var go in objectsToDisableOnWear) if (go) go.SetActive(true);
 
         if (unloadSceneOnUnwear && !string.IsNullOrEmpty(dimensionSceneName) && loadSceneAdditively)
         {
@@ -168,6 +227,9 @@ public class WearableHeadsetPersistent : MonoBehaviour
             _loadedScene = default;
         }
     }
+
+
+
 
     // Called when any scene loads - we'll use it to detect when our target scene finishes loading
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
