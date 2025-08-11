@@ -82,11 +82,11 @@ public class BallBehavior : MonoBehaviour
         // Forward
         if (moveDirection == 1)
         {
-            jumpBoolString = "JumpFront"; // temp
-            trail.transform.rotation = Quaternion.Euler(0f, 0f, 0f); // temp
-            emissionTrail1.rateOverTime = emissionCount; // temp
-            emissionTrail2.rateOverTime = emissionCount; // temp
-            isMoving = true; // temp
+            // jumpBoolString = "JumpFront"; // temp
+            // trail.transform.rotation = Quaternion.Euler(0f, 0f, 0f); // temp
+            // emissionTrail1.rateOverTime = emissionCount; // temp
+            // emissionTrail2.rateOverTime = emissionCount; // temp
+            // isMoving = true; // temp
 
             float movementSpeed = -maxMoveSpeed / 10;
             float rotationSpeed = maxRotateSpeed * 10;
@@ -97,11 +97,11 @@ public class BallBehavior : MonoBehaviour
         // Backwards
         else if (moveDirection == 2)
         {
-            jumpBoolString = "JumpBack"; // temp
-            trail.transform.rotation = Quaternion.Euler(0f, 180f, 0f); // temp
-            emissionTrail1.rateOverTime = emissionCount; // temp
-            emissionTrail2.rateOverTime = emissionCount; // temp
-            isMoving = true; // temp
+            // jumpBoolString = "JumpBack"; // temp
+            // trail.transform.rotation = Quaternion.Euler(0f, 180f, 0f); // temp
+            // emissionTrail1.rateOverTime = emissionCount; // temp
+            // emissionTrail2.rateOverTime = emissionCount; // temp
+            // isMoving = true; // temp
 
             float movementSpeed = maxMoveSpeed / 10;
             float rotationSpeed = -maxRotateSpeed * 10;
@@ -112,11 +112,11 @@ public class BallBehavior : MonoBehaviour
         // Right
         else if (moveDirection == 3)
         {
-            jumpBoolString = "JumpRight"; // temp
-            trail.transform.rotation = Quaternion.Euler(0f, 270f, 0f); // temp
-            emissionTrail1.rateOverTime = emissionCount; // temp
-            emissionTrail2.rateOverTime = emissionCount; // temp
-            isMoving = true; // temp
+            // jumpBoolString = "JumpRight"; // temp
+            // trail.transform.rotation = Quaternion.Euler(0f, 270f, 0f); // temp
+            // emissionTrail1.rateOverTime = emissionCount; // temp
+            // emissionTrail2.rateOverTime = emissionCount; // temp
+            // isMoving = true; // temp
 
             float movementSpeed = maxMoveSpeed / 10;
             float rotationSpeed = maxRotateSpeed * 10;
@@ -127,11 +127,11 @@ public class BallBehavior : MonoBehaviour
         // Left
         else if (moveDirection == 4)
         {
-            jumpBoolString = "JumpLeft"; // temp
-            trail.transform.rotation = Quaternion.Euler(0f, 90f, 0f); // temp
-            emissionTrail1.rateOverTime = emissionCount; // temp
-            emissionTrail2.rateOverTime = emissionCount; // temp
-            isMoving = true; // temp
+            // jumpBoolString = "JumpLeft"; // temp
+            // trail.transform.rotation = Quaternion.Euler(0f, 90f, 0f); // temp
+            // emissionTrail1.rateOverTime = emissionCount; // temp
+            // emissionTrail2.rateOverTime = emissionCount; // temp
+            // isMoving = true; // temp
 
             float movementSpeed = -maxMoveSpeed / 10;
             float rotationSpeed = -maxRotateSpeed * 10;
@@ -216,7 +216,7 @@ public class BallBehavior : MonoBehaviour
                 startPosition = restPosition;
                 isInitialized = true;
             }
-            tileCheck = other.GetComponent<TileCheck>();
+            tileCheck = other.GetComponentInParent<TileCheck>();
 
             if (tileCheck.getTileActive() == false)
             {
@@ -240,6 +240,11 @@ public class BallBehavior : MonoBehaviour
     public void ballReset()
     {
         ballRigidbody.MovePosition(startPosition);
+    }
+
+    public bool getMoving()
+    {
+        return isMoving;
     }
     
 }
