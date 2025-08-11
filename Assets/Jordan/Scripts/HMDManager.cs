@@ -62,7 +62,7 @@ public class HMDManager : MonoBehaviour
 
     private IEnumerator DelayedHeadsetDon(SelectEnterEventArgs args)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return null;
         ProcessHeadsetDon(args);
     }
 
