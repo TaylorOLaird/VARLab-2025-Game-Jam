@@ -1,78 +1,91 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.XR.CoreUtils;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class MainGameManager : MonoBehaviour
 {
-    public Image fadeImage;        // Fullscreen black Image
-    public GameObject loadingUI;   // Optional loading UI object
-    public float fadeDuration = 1f;
+    public SceneSwitcher SceneSwitcher;
+    public GameObject Headsets;
+    public GameObject HiddenPuzzle;
+    public GameObject Anchors;
+    public GameObject FinishColliderSpeakers;
+    public GameObject HiddenPuzzleSpeakers;
+
+    private XROrigin xrOrigin;
+
     // Start is called before the first frame update
     void Start()
     {
+        xrOrigin = FindObjectOfType<XROrigin>();
         EventManager.OnHeadsetDon += HandleHeadsetDon;
+        EventManager.OnHeadsetDoff += HandleHeadsetDoff;
+
+        if (Anchors != null && xrOrigin != null)
+        {
+            int roomIndex = EventManager.RoomNumber;
+            if (roomIndex >= 0 && roomIndex < Anchors.transform.childCount)
+            {
+                Transform anchor = Anchors.transform.GetChild(roomIndex);
+                xrOrigin.transform.SetPositionAndRotation(anchor.position, anchor.rotation);
+                FinishColliderSpeakers.transform.GetChild(roomIndex).gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning("Room index out of range for Anchors children.");
+            }
+            for (int i = 0; i <= roomIndex; i++)
+            {
+                Headsets.transform.GetChild(i).gameObject.SetActive(true);
+                if(roomIndex == 0) Headsets.transform.GetChild(i).gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Anchors or xrOrigin is not assigned.");
+        }
+
     }
 
     void HandleHeadsetDon(HMD headset)
     {
         if(headset.gameObject.name.Equals("StartHeadset"))
         {
-            StartHeadset();
+            if(EventManager.RoomNumber > 0)
+            {
+                if(HiddenPuzzle == null || HiddenPuzzleSpeakers == null)
+                {
+                    Debug.LogError("HiddenPuzzle or HiddenPuzzleSpeakers is not assigned in the inspector.");
+                    return;
+                }
+                HiddenPuzzle.SetActive(true);
+                int roomIndex = EventManager.RoomNumber - 1;
+                HiddenPuzzleSpeakers.transform.GetChild(roomIndex).gameObject.SetActive(true);
+            }
+            else
+            {
+                FirstRoom();
+            }
+                
         }
     }
 
-    void StartHeadset()
+    void HandleHeadsetDoff(HMD headset)
     {
-        FadeAndLoad("FirstRoom");
-    }
-
-    public void FadeAndLoad(string sceneName)
-    {
-        StartCoroutine(FadeAndSwitch(sceneName));
-    }
-
-    private IEnumerator FadeAndSwitch(string sceneName)
-    {
-        fadeImage.gameObject.SetActive(true);
-
-        // Fade to black
-        yield return StartCoroutine(Fade(0f, 1f));
-
-        // Show loading screen
-        if (loadingUI != null)
-            loadingUI.SetActive(true);
-
-        // Start loading asynchronously
-        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
-        op.allowSceneActivation = false;
-
-        // Wait until the scene is loaded
-        while (op.progress < 0.9f)
+        if (headset.gameObject.name.Equals("StartHeadset"))
         {
-            yield return null;
+            if (EventManager.RoomNumber > 0)
+            {
+                if (HiddenPuzzle == null || HiddenPuzzleSpeakers == null)
+                {
+                    Debug.LogError("HiddenPuzzle or HiddenPuzzleSpeakers is not assigned in the inspector.");
+                    return;
+                }
+                HiddenPuzzle.SetActive(false);
+            }
         }
-
-        // Small pause to show loading screen
-        yield return new WaitForSeconds(0.5f);
-
-        // Activate the new scene
-        op.allowSceneActivation = true;
     }
 
-    private IEnumerator Fade(float startAlpha, float endAlpha)
+    void FirstRoom()
     {
-        Color c = fadeImage.color;
-        float t = 0f;
-
-        while (t < fadeDuration)
-        {
-            t += Time.deltaTime;
-            float a = Mathf.Lerp(startAlpha, endAlpha, t / fadeDuration);
-            fadeImage.color = new Color(c.r, c.g, c.b, a);
-            yield return null;
-        }
+        SceneSwitcher.SwitchScene("FirstRoom");
     }
-
 }

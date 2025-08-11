@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class DissolveObject : MonoBehaviour
 {
+    [SerializeField] public bool dissolveInWater;
     private float dissolveSpeed = 0.5f;
     private float dissolveValue = 0f;
     private bool dissolving = false;
@@ -11,6 +12,13 @@ public class DissolveObject : MonoBehaviour
     private void Start()
     {
         mat = GetComponent<Renderer>().material;   
+        if (!dissolveInWater)
+        {
+            dissolveValue = 1f;
+            mat.SetFloat("_Dissolve", dissolveValue);
+            gameObject.SetActive(false);
+            
+        }
     }
 
     private void OnEnable()
@@ -64,11 +72,27 @@ public class DissolveObject : MonoBehaviour
     {
         if (isEnabled)
         {
-            StartDissolve();
+            if (dissolveInWater)
+            {
+                StartDissolve();
+            }
+            else
+            {
+                StartRematerialize();
+            }
+            
         }
         else 
         {
-            StartRematerialize();
+            if (dissolveInWater)
+            {
+                StartRematerialize();
+            }
+            else
+            {
+                StartDissolve();
+            }
+            
         }
     }
 }

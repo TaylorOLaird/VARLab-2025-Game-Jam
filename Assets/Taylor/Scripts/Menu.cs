@@ -63,6 +63,11 @@ public class Menu : MonoBehaviour
     {
         if (headsetIndex < headsetImages.Count)
         {
+            if(headsetImages[headsetIndex] == null)
+            {
+                Debug.LogError("Headset image at index " + headsetIndex + " is not assigned.");
+                return;
+            }
             headsetImages[headsetIndex].SetActive(true);
             HMD hmdScript = headset.GetComponent<HMD>();
             headsetImages[headsetIndex].GetComponent<SpriteRenderer>().sprite = hmdScript.headsetSprite;
@@ -79,6 +84,11 @@ public class Menu : MonoBehaviour
     {
         if (headsetIndex > 0)
         {
+            if (headsetImages[headsetIndex] == null)
+            {
+                Debug.LogError("Headset image at index " + headsetIndex + " is not assigned.");
+                return;
+            }
             headsetIndex--;
             headsetImages[headsetIndex].SetActive(false);
         }
@@ -93,6 +103,7 @@ public class Menu : MonoBehaviour
         isMenuOpen = !isMenuOpen;
         if (isMenuOpen)
         {
+            if(!menuUI) return;
             menuUI.SetActive(true);
             curve.SetActive(true);
         }
