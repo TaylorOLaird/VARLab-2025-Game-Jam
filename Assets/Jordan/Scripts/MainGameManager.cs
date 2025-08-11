@@ -168,6 +168,12 @@ public class MainGameManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        EventManager.OnHeadsetDon -= HandleHeadsetDon;
+        EventManager.OnHeadsetDoff -= HandleHeadsetDoff;
+    }
+
     void FirstRoom()
     {
         SceneSwitcher.SwitchScene("FirstRoom");
