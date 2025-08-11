@@ -8,7 +8,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Jordan/Scenes/MainScene.unity
     guid: 07c1116956f04e447bd0352973b4b27b
-<<<<<<< HEAD
   - enabled: 0
     path: Assets/Jordan/Scenes/FirstRoom.unity
     guid: 846aa7db4d78b2547a95fbcc3f340c13
@@ -16,26 +15,16 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 17f8f9377dd1a3e41a8c2cbb8e8a4f0a
   - enabled: 1
-=======
-  - enabled: 1
-    path: Assets/Scenes/ChessScene.unity
-    guid: 00dd0cd7413403248a003364ad4c1cdd
-  - enabled: 1
-    path: Assets/Jordan/Scenes/FirstRoom.unity
-    guid: 846aa7db4d78b2547a95fbcc3f340c13
-  - enabled: 0
->>>>>>> 91eba7c53f91396c80a509ee4e772ff367625660
     path: Assets/Scenes/Taylor.unity
     guid: 4beae438ef515c6489c8d651318d1ef1
   - enabled: 0
     path: Assets/Jordan/Scenes/HMD.unity
     guid: d09b47c8332e8de439faced2801b6e3f
   - enabled: 0
-<<<<<<< HEAD
-    path: Assets/Berk/Scenes/SampleScene.unity
+    path: Assets/Berk/Scenes/BerkMainScene.unity
     guid: b61d8110fdb6baf4685d3dc20c818e43
   - enabled: 0
-    path: Assets/Berk/Scenes/MiniScene1.unity
+    path: Assets/Berk/Scenes/TestScene.unity
     guid: 79aaea58f5d4de74490cb4dc8ae07b87
   - enabled: 1
     path: Assets/Taylor/Scenes/Lab.unity
@@ -43,25 +32,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Taylor/Scenes/Old.unity
     guid: e94222e4050f99e4d9d0982d2a710d71
-=======
-    path: Assets/Taylor/Scenes/Old.unity
-    guid: e94222e4050f99e4d9d0982d2a710d71
-  - enabled: 0
-    path: Assets/Taylor/Scenes/Lab.unity
-    guid: 41576723d27e8dd4bb5a1acdac2b61fc
-  - enabled: 1
-    path: Assets/Berk/Scenes/BerkMainScene.unity
-    guid: b61d8110fdb6baf4685d3dc20c818e43
-  - enabled: 1
-    path: Assets/Berk/Scenes/Adventure 1.unity
-    guid: 77737491851bb6149a79e61caa752651
-  - enabled: 1
-    path: Assets/Berk/Scenes/City 1.unity
-    guid: aa9c19da7912c6a4996a76db94b47ed0
-  - enabled: 1
-    path: Assets/Berk/Scenes/Knights 1.unity
-    guid: d7946cd2ff8ab6941ac283e8d465af13
->>>>>>> 91eba7c53f91396c80a509ee4e772ff367625660
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 7572ab5ab4711364c92aeaca72ddffc2, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}
