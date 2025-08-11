@@ -62,8 +62,13 @@ public class HMDManager : MonoBehaviour
         var hmd = go.GetComponent<HMD>();
         if (!hmd) { Debug.LogWarning("Slotted object has no HMD component."); return; }
 
-        // Unequip previous (if any)
-        if (currentlyWorn != null && currentlyWorn != hmd)
+        if (slottedObject.name.Equals("LastttHeadset"))
+        {
+            EventManager.HeadsetDon(slottedObject.GetComponent<HMD>());
+            return;
+        }
+
+        if (slottedObject.GetComponent<HMD>() == null)
         {
             // push previous back on stack so doff grabs the last one
             HMDStack.Push(currentlyWorn);

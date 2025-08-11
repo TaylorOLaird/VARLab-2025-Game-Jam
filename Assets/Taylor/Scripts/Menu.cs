@@ -82,14 +82,16 @@ public class Menu : MonoBehaviour
 
     public void removeHeadset(HMD headset)
     {
-        if (headsetIndex > 0)
+        if (headsetIndex > 0 && headsetIndex < headsetImages.Count)
         {
+
             if (headsetImages[headsetIndex] == null)
             {
                 Debug.LogError("Headset image at index " + headsetIndex + " is not assigned.");
                 return;
             }
             headsetIndex--;
+            if(headsetIndex < 0) headsetIndex = 0; // Ensure index does not go negative
             headsetImages[headsetIndex].SetActive(false);
         }
         else
