@@ -56,6 +56,7 @@ public class LevelManager : MonoBehaviour
         BuildOverlayUI();
     }
 
+
     void BuildOverlayUI()
     {
         _canvas = new GameObject("DeathOverlayCanvas").AddComponent<Canvas>();
