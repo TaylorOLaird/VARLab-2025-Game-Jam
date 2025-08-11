@@ -8,11 +8,10 @@ public class WaterManager : MonoBehaviour
     public int goals;
     [SerializeField] private GameObject EndHeadset;
     [SerializeField] private Volume volume;
-    [SerializeField] private Color color;
-    [SerializeField] private float fogDensity;
     [SerializeField] private GameObject currents;
     [SerializeField] private InputActionReference reset;
     [SerializeField] private GameObject movableCube;
+    [SerializeField] private SceneSwitcher sceneSwitcher;
     private List<Transform> currentPivots;
     private Vector3 initialPos;
 
