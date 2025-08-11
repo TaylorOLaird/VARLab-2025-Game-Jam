@@ -42,4 +42,9 @@ public class BoardManager : MonoBehaviour
         ++currentTileCount;
         remainingSpacesText.text = "Spaces Remaining \n" + (maxTileCount - currentTileCount);
     }
+    public void Win()
+    {
+        lockedDoor.SetActive(false);
+        winSound.Play();
+    }
 }
