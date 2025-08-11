@@ -13,6 +13,8 @@ public class TaylorLevelManager : MonoBehaviour
     [SerializeField] private float flashOffset = 0.0f;
     [SerializeField] private CameraColider cameraColliderScript;
     [SerializeField] private List<GameObject> objectsToSwitch;
+    [SerializeField] private GameObject finalHMD;
+    [SerializeField] private GameObject finalStump;
 
     private string currentRelmName = "Lab";
     private int FlashDuration = 0;
@@ -35,6 +37,17 @@ public class TaylorLevelManager : MonoBehaviour
         else
         {
             CameraFlash.weight = 0f;
+        }
+        // only show the final HMD and stump if the current realm is "Lab"
+        if (currentRelmName == "Lab")
+        {
+            finalHMD.SetActive(true);
+            finalStump.SetActive(true);
+        }
+        else
+        {
+            finalHMD.SetActive(false);
+            finalStump.SetActive(false);
         }
     }
 

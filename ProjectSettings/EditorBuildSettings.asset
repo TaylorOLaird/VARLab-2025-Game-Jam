@@ -5,16 +5,16 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Jordan/Scenes/MainScene.unity
     guid: 07c1116956f04e447bd0352973b4b27b
-  - enabled: 1
+  - enabled: 0
     path: Assets/Jordan/Scenes/FirstRoom.unity
     guid: 846aa7db4d78b2547a95fbcc3f340c13
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 17f8f9377dd1a3e41a8c2cbb8e8a4f0a
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Taylor.unity
     guid: 4beae438ef515c6489c8d651318d1ef1
   - enabled: 0
@@ -26,10 +26,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Berk/Scenes/MiniScene1.unity
     guid: 79aaea58f5d4de74490cb4dc8ae07b87
-  - enabled: 0
+  - enabled: 1
     path: Assets/Taylor/Scenes/Lab.unity
     guid: 41576723d27e8dd4bb5a1acdac2b61fc
-  - enabled: 0
+  - enabled: 1
     path: Assets/Taylor/Scenes/Old.unity
     guid: e94222e4050f99e4d9d0982d2a710d71
   m_configObjects:
