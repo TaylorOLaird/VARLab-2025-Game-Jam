@@ -42,7 +42,7 @@ public class HMDIdleFloat : MonoBehaviour
     void Awake()
     {
         _grab = GetComponent<XRGrabInteractable>();
-        _rb   = GetComponent<Rigidbody>();
+        _rb = GetComponent<Rigidbody>();
 
         // XR usually uses kinematic bodies for grabbed objects; keep kinematic to avoid gravity drift.
         if (_rb) _rb.isKinematic = true;
@@ -83,8 +83,7 @@ public class HMDIdleFloat : MonoBehaviour
     {
         if (!_idle) return;
 
-        // Stop any rigidbody motion while idle so it stays put
-        if (_rb)
+        if (_rb && !_rb.isKinematic)   // <<< only when non-kinematic
         {
             _rb.velocity = Vector3.zero;
             _rb.angularVelocity = Vector3.zero;
@@ -117,13 +116,25 @@ public class HMDIdleFloat : MonoBehaviour
         if (_returnRoutine != null) { StopCoroutine(_returnRoutine); _returnRoutine = null; }
     }
 
-    void OnSelectExited(SelectExitEventArgs _)
+void OnSelectExited(SelectExitEventArgs _)
+{
+    // Ensure physics won't fight the return:
+    if (_rb)
     {
-        // Glide back to base height, then resume idle
-        if (_returnRoutine != null) StopCoroutine(_returnRoutine);
-        _returnRoutine = StartCoroutine(ReturnToBaseHeight());
+        // If it was dynamic while held, zero velocities BEFORE making it kinematic
+        if (!_rb.isKinematic)
+        {
+            _rb.velocity = Vector3.zero;
+            _rb.angularVelocity = Vector3.zero;
+        }
+        _rb.isKinematic = true;   // lock it for the glide
+        _rb.useGravity  = false;
     }
 
+    // Glide back to base height, then resume idle
+    if (_returnRoutine != null) StopCoroutine(_returnRoutine);
+    _returnRoutine = StartCoroutine(ReturnToBaseHeight());
+}
     void StartReturn()
     {
         if (_returnRoutine != null) StopCoroutine(_returnRoutine);
@@ -134,8 +145,13 @@ public class HMDIdleFloat : MonoBehaviour
     {
         _idle = false;
 
+        if (_rb)
+        {
+            _rb.isKinematic = true;   // lock it for the tween
+            _rb.useGravity = false;
+        }
         Vector3 start = transform.position;
-        Vector3 end   = new Vector3(start.x, _baseY, start.z);
+        Vector3 end = new Vector3(start.x, _baseY, start.z);
         float t = 0f;
         float dur = Mathf.Max(0.01f, returnDuration);
 
