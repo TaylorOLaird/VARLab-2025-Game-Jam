@@ -66,6 +66,10 @@ public class WearableHeadsetPersistent : MonoBehaviour
     [Tooltip("When true, clears persistent_objects.json on startup (useful for testing).")]
     public bool flushPersistentDataOnStart = false;
 
+    [Header("Audio")]
+    [Tooltip("ID of ambient audio entry in AudioManager to play while this headset is worn (leave empty for none).")]
+    public string ambientSoundId;
+
     void Start()
     {
         if (flushPersistentDataOnStart)
@@ -173,6 +177,12 @@ public class WearableHeadsetPersistent : MonoBehaviour
 
         if (postProcessVolume != null) postProcessVolume.weight = 1f;
 
+        // start ambient sfx for this headset (if assigned)
+        if (!string.IsNullOrEmpty(ambientSoundId) && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayAmbient(ambientSoundId);
+        }
+
         foreach (var go in objectsToEnableOnWear) if (go) go.SetActive(true);
         foreach (var go in objectsToDisableOnWear) if (go) go.SetActive(false);
 
@@ -205,6 +215,13 @@ public class WearableHeadsetPersistent : MonoBehaviour
         _isWorn = false;
 
         if (postProcessVolume != null) postProcessVolume.weight = 0f;
+
+        // stop ambient sfx for this headset (if assigned)
+        if (!string.IsNullOrEmpty(ambientSoundId) && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopAmbient(ambientSoundId);
+        }
+
         foreach (var go in objectsToEnableOnWear) if (go) go.SetActive(false);
         foreach (var go in objectsToDisableOnWear) if (go) go.SetActive(true);
 

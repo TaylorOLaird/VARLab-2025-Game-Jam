@@ -22,10 +22,6 @@ public class PuzzleManager : MonoBehaviour
     public GameObject finalSpawnPrefab;
     public Transform finalSpawnPoint;
 
-    [Tooltip("Optional sound to play on completion.")]
-    public AudioClip completionSfx;
-    public AudioSource audioSource;
-
     [Header("Event")]
     public UnityEvent onAllPlaced;
 
@@ -106,10 +102,11 @@ public class PuzzleManager : MonoBehaviour
         }
 
         // play sound
-        if (completionSfx != null)
+        // play centralized 'complete' clip if present in AudioManager; otherwise fallback to local clip
+        if (AudioManager.Instance != null)
         {
-            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.PlayOneShot(completionSfx);
+            // try to play by id 'complete' (assuming you added that id)
+            AudioManager.Instance.PlayOneShot("complete");
         }
 
         // custom events
