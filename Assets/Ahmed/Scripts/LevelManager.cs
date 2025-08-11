@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,11 +10,11 @@ public class LevelManager : MonoBehaviour
     [Header("Respawn")]
     public Transform respawnPoint;
 
-    // CHANGED: give yourself a longer “black time” before fade-in
-    public float blackFadeIn  = 0.35f;  // to black
-    public float blackHold    = 0.10f;  // existing hold
-    public float blackHoldExtra = 1.50f; // NEW: extra hold (1–2s as requested)
-    public float blackFadeOut = 0.40f;  // back to scene
+    // Black screen timings
+    public float blackFadeIn    = 0.35f;  // to black
+    public float blackHold      = 0.10f;  // base hold
+    public float blackHoldExtra = 1.50f;  // extra hold while placing
+    public float blackFadeOut   = 0.40f;  // back to scene
 
     [Header("Hit Feedback")]
     public float redFlashIn   = 0.08f;
@@ -28,13 +29,17 @@ public class LevelManager : MonoBehaviour
     public Transform playerRootOverride;
     public string playerTag = "Player";
 
-    [Header("Respawn Safety")]
-    [Tooltip("BoxCollider that bounds the hallway you want the player to appear inside.")]
-    public BoxCollider respawnHallwayBounds;   // NEW
-    [Tooltip("Small clearance so the capsule doesn't clip walls.")]
-    public float boundsMargin = 0.02f;         // NEW
+    [Header("Respawn Safety (no bounds collider)")]
+    [Tooltip("Layers considered solid ground when snapping the player to the floor at respawn.")]
+    public LayerMask groundMask = ~0;
+    [Tooltip("Start the ground probe this far above the spawn point.")]
+    public float groundProbeUp = 1.5f;
+    [Tooltip("Probe this far downward from the start height.")]
+    public float groundProbeDown = 6f;
+    [Tooltip("Small clearance above the floor so the capsule bottom doesn’t clip.")]
+    public float groundClearance = 0.02f;
     [Tooltip("Extra settle time (physics frames) before we fade back in.")]
-    public int settleFixedFrames = 2;          // NEW
+    public int settleFixedFrames = 2;
 
     Canvas _canvas;
     Image _red;
@@ -74,8 +79,8 @@ public class LevelManager : MonoBehaviour
             return rt;
         }
 
-        FullRect("BlackFade", new Color(0,0,0,0), out _black);
-        FullRect("RedFlash",  new Color(1,0,0,0), out _red);
+        FullRect("BlackFade", new Color(0, 0, 0, 0), out _black);
+        FullRect("RedFlash",  new Color(1, 0, 0, 0), out _red);
     }
 
     public void KillPlayer(Transform playerRoot)
@@ -86,23 +91,26 @@ public class LevelManager : MonoBehaviour
             Debug.LogWarning("[LevelManager] No respawnPoint set.");
             return;
         }
-        var target = ResolvePlayerRoot(playerRoot);
-        if (target == null)
+        var rigRoot = ResolvePlayerRoot(playerRoot);
+        if (rigRoot == null)
         {
             Debug.LogWarning("[LevelManager] Could not resolve a player root to respawn.");
             return;
         }
-        StartCoroutine(DeathSequence(target));
+        StartCoroutine(DeathSequence(rigRoot));
     }
 
     Transform ResolvePlayerRoot(Transform candidate)
     {
         if (playerRootOverride) return playerRootOverride;
         if (candidate && candidate.CompareTag(playerTag)) return candidate;
+
         var tagged = GameObject.FindWithTag(playerTag);
         if (tagged) return tagged.transform;
+
         if (xrCamera)
         {
+            // fall back to nearest CC root to the camera
             var ccs = FindObjectsOfType<CharacterController>();
             float best = float.PositiveInfinity;
             Transform bestT = null;
@@ -113,103 +121,199 @@ public class LevelManager : MonoBehaviour
             }
             if (bestT) return bestT;
         }
-        return candidate;
+        return candidate ? candidate.root : null;
     }
 
-    IEnumerator DeathSequence(Transform playerRoot)
+    IEnumerator DeathSequence(Transform rigRoot)
     {
         _isRespawning = true;
 
-        // particle burst at player
+        // particle burst at current position
         if (deathExplosionPrefab)
         {
-            var fx = Instantiate(deathExplosionPrefab, playerRoot.position, Quaternion.identity);
+            var fx = Instantiate(deathExplosionPrefab, rigRoot.position, Quaternion.identity);
             Destroy(fx.gameObject, fx.main.duration + fx.main.startLifetime.constantMax + 0.5f);
         }
 
         // quick red flash
         yield return StartCoroutine(Flash(_red, redFlashIn, redFlashHold, redFlashOut));
 
-        // fade to black (same speed) …
+        // fade to black
         yield return StartCoroutine(FadeTo(_black, 1f, blackFadeIn));
-        // … then hold longer (extra second or two)
         yield return new WaitForSeconds(blackHold + Mathf.Max(0f, blackHoldExtra));
 
-        // place the player safely while fully black
-        yield return StartCoroutine(SafePlacePlayer(playerRoot));
+        // Reset puzzle items (headsets etc.)
+        if (HMDManagerLaser.Instance) HMDManagerLaser.Instance.ResetHeadsetsToSpawn();
 
-        // fade back in
+        // Clear any floating-menu headset stacks (if you added ClearHeadsetUI)
+        ClearAllHeadsetUIStacks();
+
+        // Freeze ALL rigidbodies under the rig so we don't carry velocity
+        var frozen = FreezeAllRigidbodies(rigRoot, freeze: true);
+
+        // Teleport ENTIRE XR RIG safely
+        yield return StartCoroutine(SafePlaceRig(rigRoot));
+
+        // Let physics tick while still black/frozen
+        for (int i = 0; i < Mathf.Max(0, settleFixedFrames); i++)
+            yield return new WaitForFixedUpdate();
+
+        // Unfreeze
+        FreezeAllRigidbodies(rigRoot, freeze: false, frozenStates: frozen);
+
+        // fade back
         yield return StartCoroutine(FadeTo(_black, 0f, blackFadeOut));
 
         _isRespawning = false;
     }
 
-    IEnumerator SafePlacePlayer(Transform playerRoot)
+    void ClearAllHeadsetUIStacks()
     {
-        var cc = playerRoot.GetComponentInChildren<CharacterController>();
-        // Temporarily disable the controller so we can teleport cleanly
-        if (cc) cc.enabled = false;
-
-        // Zero any rigidbody velocities on the rig (prevents “launching”)
-        foreach (var rb in playerRoot.GetComponentsInChildren<Rigidbody>())
+        var menus = FindObjectsOfType<MenuLaser>(true);
+        foreach (var m in menus)
         {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            if (!m) continue;
+            try { m.ClearHeadsetUI(); } catch { /* optional */ }
         }
+    }
 
-        // Compute a safe root position
-        Vector3 newRootPos = respawnPoint.position;
-        Quaternion newRootRot = Quaternion.Euler(0f, respawnPoint.eulerAngles.y, 0f);
+    IEnumerator SafePlaceRig(Transform rigRoot)
+    {
+        // Find any CC under the rig (typical XR Origin has it on the root; but we support child too)
+        var cc = rigRoot.GetComponentInChildren<CharacterController>(true);
 
-        if (cc && respawnHallwayBounds)
+        // Disable any CCs under rig so teleports don't collide mid-move
+        var allCCs = rigRoot.GetComponentsInChildren<CharacterController>(true);
+        foreach (var c in allCCs) c.enabled = false;
+
+        // Step 1: place rig root at spawn yaw/pos
+        Quaternion targetYaw = Quaternion.Euler(0f, respawnPoint.eulerAngles.y, 0f);
+        rigRoot.SetPositionAndRotation(respawnPoint.position, targetYaw);
+
+        // Step 2: find floor under spawn
+        float startY = respawnPoint.position.y + groundProbeUp;
+        Vector3 probeStart = new Vector3(respawnPoint.position.x, startY, respawnPoint.position.z);
+        float maxDist = groundProbeUp + groundProbeDown;
+        float floorY;
+        if (Physics.Raycast(probeStart, Vector3.down, out var hit, maxDist, groundMask, QueryTriggerInteraction.Ignore))
+            floorY = hit.point.y;
+        else
+            floorY = respawnPoint.position.y; // fallback
+
+        // Step 3: vertically correct so CC bottom rests at floor+clearance, using actual transformed center
+        if (cc)
         {
-            // Clamp the capsule center inside the box, accounting for radius/height
-            Vector3 desiredCenter = newRootPos + cc.center;
-            Vector3 clampedCenter = ClampCapsuleCenterInside(respawnHallwayBounds, desiredCenter, cc.radius, cc.height, boundsMargin);
+            float halfHeight = Mathf.Max(cc.height * 0.5f, cc.radius);
+            float bottomToCenter = halfHeight - cc.radius;
 
-            // Optional: snap to floor under the clamped center
-            Vector3 probeStart = clampedCenter + Vector3.up * 0.3f;
-            if (Physics.Raycast(probeStart, Vector3.down, out var hit, 5f, ~0, QueryTriggerInteraction.Ignore))
+            // where is the center RIGHT NOW in world?
+            Vector3 centerWorld = cc.transform.TransformPoint(cc.center);
+            float desiredCenterY = floorY + cc.radius + groundClearance + bottomToCenter;
+
+            float dy = desiredCenterY - centerWorld.y;
+            rigRoot.position += Vector3.up * dy;
+
+            // If overlapping, nudge the rig upward until clear
+            const int steps = 12;
+            const float stepUp = 0.04f;
+            if (IsCapsuleOverlappingAtCurrentPose(rigRoot, cc))
             {
-                float bottomToCenter = cc.height * 0.5f - cc.radius; // center above bottom
-                clampedCenter.y = hit.point.y + bottomToCenter + cc.radius + 0.01f;
+                for (int i = 0; i < steps; i++)
+                {
+                    rigRoot.position += Vector3.up * stepUp;
+                    if (!IsCapsuleOverlappingAtCurrentPose(rigRoot, cc)) break;
+                }
             }
-
-            newRootPos = clampedCenter - cc.center;
+        }
+        else
+        {
+            // No CC: just sit rig a hair above floor
+            var p = rigRoot.position;
+            p.y = floorY + groundClearance;
+            rigRoot.position = p;
         }
 
-        // Teleport
-        playerRoot.SetPositionAndRotation(newRootPos, newRootRot);
+        // Re-enable CCs
+        foreach (var c in allCCs) c.enabled = true;
 
-        // Let physics settle a couple of fixed frames while still black
-        for (int i = 0; i < Mathf.Max(0, settleFixedFrames); i++)
-            yield return new WaitForFixedUpdate();
-
-        if (cc) cc.enabled = true;
+        yield break;
     }
 
-    // Clamp a capsule center inside a BoxCollider in local space, with margins
-    Vector3 ClampCapsuleCenterInside(BoxCollider box, Vector3 capsuleCenterWorld, float radius, float height, float margin)
+    bool IsCapsuleOverlappingAtCurrentPose(Transform rigRoot, CharacterController cc)
     {
-        var t = box.transform;
+        if (!cc) return false;
 
-        // Convert to the collider's local space, offset by its center
-        Vector3 local = t.InverseTransformPoint(capsuleCenterWorld) - box.center;
-        Vector3 half = box.size * 0.5f;
+        float halfHeight = Mathf.Max(cc.height * 0.5f, cc.radius);
+        Vector3 up = cc.transform.up;
 
-        // Effective half extents reduced by capsule extents + margin
-        float halfHeight = Mathf.Max(radius, height * 0.5f);
-        Vector3 reduce = new Vector3(radius + margin, halfHeight + margin, radius + margin);
+        Vector3 centerWorld = cc.transform.TransformPoint(cc.center);
+        Vector3 p1 = centerWorld + up * (halfHeight - cc.radius);
+        Vector3 p2 = centerWorld - up * (halfHeight - cc.radius);
 
-        // Clamp inside
-        local.x = Mathf.Clamp(local.x, -half.x + reduce.x, half.x - reduce.x);
-        local.y = Mathf.Clamp(local.y, -half.y + reduce.y, half.y - reduce.y);
-        local.z = Mathf.Clamp(local.z, -half.z + reduce.z, half.z - reduce.z);
-
-        // Back to world
-        return t.TransformPoint(local + box.center);
+        var hits = Physics.OverlapCapsule(p1, p2, cc.radius, ~0, QueryTriggerInteraction.Ignore);
+        foreach (var h in hits)
+        {
+            if (!h || h.transform == null) continue;
+            if (!h.transform.IsChildOf(rigRoot)) return true; // hit something that's not the rig
+        }
+        return false;
     }
 
+    // --- Hard-freeze/unfreeze ALL rigidbodies under the player root during respawn ---
+    struct RBState
+    {
+        public Rigidbody rb;
+        public bool wasKinematic;
+        public bool usedGravity;
+        public RigidbodyConstraints constraints;
+    }
+
+    List<RBState> FreezeAllRigidbodies(Transform root, bool freeze, List<RBState> frozenStates = null)
+    {
+        if (freeze)
+        {
+            var list = new List<RBState>();
+            foreach (var rb in root.GetComponentsInChildren<Rigidbody>(true))
+            {
+                var state = new RBState
+                {
+                    rb = rb,
+                    wasKinematic = rb.isKinematic,
+                    usedGravity = rb.useGravity,
+                    constraints = rb.constraints
+                };
+
+                if (!rb.isKinematic)
+                {
+                    rb.velocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+
+                rb.isKinematic = true;
+                rb.useGravity = false;
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+
+                list.Add(state);
+            }
+            return list;
+        }
+        else
+        {
+            if (frozenStates != null)
+            {
+                foreach (var st in frozenStates)
+                {
+                    if (!st.rb) continue;
+                    st.rb.constraints = st.constraints;
+                    st.rb.useGravity  = st.usedGravity;
+                    st.rb.isKinematic = st.wasKinematic;
+                }
+            }
+            return null;
+        }
+    }
+
+    // --- UI helpers ---
     IEnumerator FadeTo(Image img, float targetA, float duration)
     {
         float startA = img.color.a;
