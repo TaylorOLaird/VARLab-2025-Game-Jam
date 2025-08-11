@@ -131,23 +131,28 @@ public class MainGameManager : MonoBehaviour
         }
         else if (headsetName.Equals("WaterHeadset"))
         {
-            SceneSwitcher.SwitchScene("WaterScene");
+            if (EventManager.RoomNumber <= 2)
+                SceneSwitcher.SwitchScene("WaterScene");
         }
         else if (headsetName.Equals("LaserHeadset"))
         {
-            SceneSwitcher.SwitchScene("AhmedTestScene");
+            if (EventManager.RoomNumber <= 1)
+                SceneSwitcher.SwitchScene("AhmedTestScene");
         }
         else if(headsetName.Equals("CameraHeadset"))
         {
-            SceneSwitcher.SwitchScene("Taylor");
+            if (EventManager.RoomNumber <= 4)
+                SceneSwitcher.SwitchScene("Taylor");
         }
         else if (headsetName.Equals("BallHeadset"))
         {
-            SceneSwitcher.SwitchScene("ChessScene");
+            if (EventManager.RoomNumber <= 3)
+                SceneSwitcher.SwitchScene("ChessScene");
         }
         else if (headsetName.Equals("DimensionHeadset"))
         {
-            SceneSwitcher.SwitchScene("BerkMainScene");
+            if (EventManager.RoomNumber <= 5)
+                SceneSwitcher.SwitchScene("BerkMainScene");
         }
     }
 
