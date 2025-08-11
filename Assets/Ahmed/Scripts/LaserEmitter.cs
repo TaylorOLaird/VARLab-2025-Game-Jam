@@ -59,9 +59,9 @@ public class LaserEmitter : MonoBehaviour
     public AudioClip deathSfx;
     [Range(0f, 1f)] public float deathSfxVolume = 1f;
 
-public static readonly List<LaserEmitter> All = new List<LaserEmitter>();
+    public static readonly List<LaserEmitter> All = new List<LaserEmitter>();
 
-[SerializeField] bool _suppressed; // when true, this beam is hidden & non-lethal
+    [SerializeField] bool _suppressed; // when true, this beam is hidden & non-lethal
     public LaserType ColorType => laser;
 
     struct RingSlot { public Renderer r; public int matIndex; public MaterialPropertyBlock mpb; }
@@ -89,13 +89,29 @@ public static readonly List<LaserEmitter> All = new List<LaserEmitter>();
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
     }
 
-void OnEnable(){ if (!All.Contains(this)) All.Add(this); Ensure(); CacheRingSlots(); UpdateAll(true); }
-void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
+    void OnEnable()
+    {
+        if (!All.Contains(this)) All.Add(this);
+        Ensure(allowCreate: true);      // runtime: create/attach
+        CacheRingSlots();
+        UpdateAll(true);
+    }
+    void OnDisable()
+    {
+        All.Remove(this);
+        if (_beamAudio) _beamAudio.Stop();
+    }
 
-    void OnValidate() { Ensure(); CacheRingSlots(); UpdateAll(true); }
+    void OnValidate()
+    {
+        Ensure(allowCreate: false);     // editor validation: do NOT add components
+        CacheRingSlots();
+        UpdateAll(true);
+    }
+
     void Update() { UpdateAll(false); }
 
-    void Ensure()
+    void Ensure(bool allowCreate)
     {
         if (!_rb) _rb = GetComponent<Rigidbody>();
         if (_rb)
@@ -111,75 +127,52 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
         if (coreLR) coreLR.textureMode = LineTextureMode.Tile;
         if (glowLR) glowLR.textureMode = LineTextureMode.Tile;
 
-        EnsureBeamTrigger();
+        EnsureBeamTrigger(allowCreate);
         EnsureBeamAudio();
     }
 
-   void EnsureBeamTrigger()
-{
-    // 1) Find all children named __BeamTrigger; keep the first, delete the rest
-    Transform keep = null;
-    var toDelete = new List<GameObject>();
-    for (int i = 0; i < transform.childCount; i++)
+    void EnsureBeamTrigger(bool allowCreate)
     {
-        var c = transform.GetChild(i);
-        if (c.name != "__BeamTrigger") continue;
-        if (keep == null) keep = c;
-        else toDelete.Add(c.gameObject);
-    }
-
-    // Delete extras (immediate in editor, normal in play)
-    for (int i = 0; i < toDelete.Count; i++)
-    {
-#if UNITY_EDITOR
-        if (!Application.isPlaying) DestroyImmediate(toDelete[i]);
-        else
-#endif
-        Destroy(toDelete[i]);
-    }
-
-    // 2) Create one if none
-    if (keep == null)
-    {
-#if UNITY_EDITOR
-        // Avoid creating during prefab import/validation noise unless actually needed
-#endif
-        var go = new GameObject("__BeamTrigger");
-        go.layer = gameObject.layer;
-        go.transform.SetParent(transform, false);
-        keep = go.transform;
-    }
-
-    _beamTriggerTf = keep;
-
-    // 3) Ensure there is exactly one BoxCollider set as trigger
-    var colliders = _beamTriggerTf.GetComponents<BoxCollider>();
-    if (colliders.Length == 0)
-    {
-        _beamTrigger = _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
-    }
-    else
-    {
-        _beamTrigger = colliders[0];
-        for (int i = 1; i < colliders.Length; i++)
+        // find or (optionally) create the child
+        var t = transform.Find("__BeamTrigger");
+        if (!t)
         {
-#if UNITY_EDITOR
-            if (!Application.isPlaying) DestroyImmediate(colliders[i]);
-            else
-#endif
-            Destroy(colliders[i]);
+            if (!allowCreate)
+            {
+                _beamTriggerTf = null;
+                _beamTrigger = null;
+                return;
+            }
+            var go = new GameObject("__BeamTrigger");
+            go.layer = gameObject.layer;
+            go.transform.SetParent(transform, false);
+            _beamTriggerTf = go.transform;
         }
-    }
-    _beamTrigger.isTrigger = true;
+        else
+        {
+            _beamTriggerTf = t;
+        }
+
+        // ensure collider (runtime only to avoid editor warnings)
+        _beamTrigger = _beamTriggerTf.GetComponent<BoxCollider>();
+        if (!_beamTrigger && allowCreate)
+            _beamTrigger = _beamTriggerTf.gameObject.AddComponent<BoxCollider>();
+        if (_beamTrigger) _beamTrigger.isTrigger = true;
+
+        // add the relay (runtime only)
+        if (allowCreate)
+        {
+            var relay = _beamTriggerTf.GetComponent<BeamHitRelay>();
+            if (!relay) relay = _beamTriggerTf.gameObject.AddComponent<BeamHitRelay>();
+            relay.owner = this;
+        }
 
 #if UNITY_EDITOR
-    // 4) Strip any Missing Script components from the trigger child in the editor
-    if (!Application.isPlaying)
-    {
-        UnityEditor.GameObjectUtility.RemoveMonoBehavioursWithMissingScript(_beamTriggerTf.gameObject);
-    }
+        // clean up any Missing Script components in editor
+        if (!Application.isPlaying)
+            UnityEditor.GameObjectUtility.RemoveMonoBehavioursWithMissingScript(_beamTriggerTf.gameObject);
 #endif
-}
+    }
 
 
     void EnsureBeamAudio()
@@ -217,9 +210,6 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
         // Assign clip if needed
         if (_beamAudio && _beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
     }
-
-    void OnTriggerEnter(Collider other) { OnBeamTriggerTouched(other); }
-    void OnTriggerStay(Collider other) { OnBeamTriggerTouched(other); }
 
     public void SetSuppressed(bool value)
     {
@@ -276,13 +266,13 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
     void UpdateAll(bool force)
     {
         if (_suppressed)
-    {
-        // keep trigger off & lines off while suppressed
-        if (_beamTrigger) _beamTrigger.enabled = false;
-        if (coreLR) coreLR.enabled = false;
-        if (glowLR) glowLR.enabled = false;
-        return;
-    }
+        {
+            // keep trigger off & lines off while suppressed
+            if (_beamTrigger) _beamTrigger.enabled = false;
+            if (coreLR) coreLR.enabled = false;
+            if (glowLR) glowLR.enabled = false;
+            return;
+        }
 
         _start = transform.position;
         var dir = transform.forward;
@@ -382,50 +372,52 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
     }
 
     // --- LETHAL TRIGGER ---
-    void UpdateBeamTrigger(Vector3 a, Vector3 b, float radius)
+   void UpdateBeamTrigger(Vector3 a, Vector3 b, float radius)
+{
+    // Only create/attach the child trigger at runtime (prevents editor spam)
+    EnsureBeamTrigger(Application.isPlaying);
+    if (!_beamTriggerTf || !_beamTrigger) return;
+
+    _beamTrigger.enabled = true;
+
+    Vector3 mid = (a + b) * 0.5f;
+    Vector3 dir = (b - a);
+    float len = Mathf.Max(0.001f, dir.magnitude);
+
+    // Guard against zero-length to avoid LookRotation errors
+    var rot = (len > 0.0001f) ? Quaternion.LookRotation(dir.normalized, Vector3.up) : _beamTriggerTf.rotation;
+
+    _beamTriggerTf.SetPositionAndRotation(mid, rot);
+    _beamTrigger.size = new Vector3(Mathf.Max(0.001f, radius * 2f),
+                                    Mathf.Max(0.001f, radius * 2f),
+                                    len);
+    _beamTrigger.center = Vector3.zero;
+}
+
+
+   internal void OnBeamTriggerTouched(Collider other)
+{
+    if (!lethal || other == null) return;
+
+    // Early out if the root isn’t on PlayerRig layer (prevents mis-tagged objects)
+    int playerLayer = LayerMask.NameToLayer("PlayerRig");
+    if (playerLayer != -1 && other.transform.root.gameObject.layer != playerLayer) return;
+
+    var root = other.transform.root;
+    if (!root.CompareTag(playerTag)) return;
+
+    var lm = LevelManager.Instance;
+    if (lm != null && !lm.IsRespawning)
     {
-        EnsureBeamTrigger();
-        if (!_beamTriggerTf || !_beamTrigger) return;
-
-        _beamTrigger.enabled = true;
-
-        Vector3 mid = (a + b) * 0.5f;
-        Vector3 dir = (b - a);
-        float len = Mathf.Max(0.001f, dir.magnitude);
-
-        _beamTriggerTf.SetPositionAndRotation(mid, Quaternion.LookRotation(dir.normalized, Vector3.up));
-        _beamTrigger.size = new Vector3(Mathf.Max(0.001f, radius * 2f), Mathf.Max(0.001f, radius * 2f), len);
-        _beamTrigger.center = Vector3.zero;
-    }
-
-    internal void OnBeamTriggerTouched(Collider other)
-    {
-        if (!lethal || other == null) return;
-
-        var root = other.transform.root;
-        if (!root.CompareTag(playerTag)) return;
-
-        var lm = LevelManager.Instance;
-        if (lm != null)
+        if (deathSfx)
         {
-            // Only fire once per death
-            if (!lm.IsRespawning)
-            {
-                if (deathSfx)
-                {
-                    Vector3 sfxPos = (playerHead != null) ? playerHead.position : root.position;
-                    AudioSource.PlayClipAtPoint(deathSfx, sfxPos, Mathf.Clamp01(deathSfxVolume));
-                }
-
-
-                lm.KillPlayer(root);
-            }
+            Vector3 sfxPos = (playerHead != null) ? playerHead.position : root.position;
+            AudioSource.PlayClipAtPoint(deathSfx, sfxPos, Mathf.Clamp01(deathSfxVolume));
         }
-        else
-        {
-            Debug.LogWarning("[LaserEmitter] No LevelManager.Instance found.");
-        }
+        lm.KillPlayer(root);
     }
+}
+
 
     public void SetLaser(LaserType t) { laser = t; UpdateAll(true); }
 
@@ -471,4 +463,11 @@ void OnDisable(){ All.Remove(this); if (_beamAudio) _beamAudio.Stop(); }
         if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
         if (!_beamAudio.isPlaying) _beamAudio.Play();
     }
+
+    private class BeamHitRelay : MonoBehaviour
+{
+    [HideInInspector] public LaserEmitter owner;
+    void OnTriggerEnter(Collider other) => owner?.OnBeamTriggerTouched(other);
+    void OnTriggerStay(Collider other)  => owner?.OnBeamTriggerTouched(other);
+}
 }
