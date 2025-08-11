@@ -4,7 +4,7 @@ using UnityEngine;
 public class MainGameManager : MonoBehaviour
 {
     public SceneSwitcher SceneSwitcher;
-    public GameObject StartHeadset;
+    public GameObject Headsets;
     public GameObject HiddenPuzzle;
     public GameObject Anchors;
     public GameObject FinishColliderSpeakers;
@@ -19,7 +19,6 @@ public class MainGameManager : MonoBehaviour
         EventManager.OnHeadsetDon += HandleHeadsetDon;
         EventManager.OnHeadsetDoff += HandleHeadsetDoff;
 
-        StartHeadset.SetActive(EventManager.RoomNumber > 0);
         if (Anchors != null && xrOrigin != null)
         {
             int roomIndex = EventManager.RoomNumber;
@@ -32,6 +31,11 @@ public class MainGameManager : MonoBehaviour
             else
             {
                 Debug.LogWarning("Room index out of range for Anchors children.");
+            }
+            for (int i = 0; i <= roomIndex; i++)
+            {
+                Headsets.transform.GetChild(i).gameObject.SetActive(true);
+                if(roomIndex == 0) Headsets.transform.GetChild(i).gameObject.SetActive(false);
             }
         }
         else
