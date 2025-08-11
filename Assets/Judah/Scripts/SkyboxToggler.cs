@@ -9,6 +9,7 @@ public class SkyboxToggler : MonoBehaviour
     void Start()
     {
         savedSkybox = RenderSettings.skybox;
+        EnableSkybox();
     }
     [ContextMenu("Disable Skybox")]
     public void DisableSkybox()

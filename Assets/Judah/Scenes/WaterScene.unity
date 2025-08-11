@@ -591,7 +591,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7184966249884574714, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8902551375521323615, guid: 502589d23eedb354ab7c6069dbaf976e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6797,7 +6797,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 336603622166569143, guid: e3c9643217747ef4da25255a8966e956, type: 3}
       propertyPath: TextToSpeakOnce
-      value: test test etst test est est te tse tests
+      value: 'Welcome to the water puzzle. '
       objectReference: {fileID: 0}
     - target: {fileID: 3743304136572949537, guid: e3c9643217747ef4da25255a8966e956, type: 3}
       propertyPath: m_Name
@@ -6817,7 +6817,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5228813342618147976, guid: e3c9643217747ef4da25255a8966e956, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.014
+      value: -1.901
       objectReference: {fileID: 0}
     - target: {fileID: 5228813342618147976, guid: e3c9643217747ef4da25255a8966e956, type: 3}
       propertyPath: m_LocalRotation.w
