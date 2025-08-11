@@ -112,6 +112,36 @@ public class TaylorLevelManager : MonoBehaviour
                 }
                 displayObjectsInRelm();
             }
+            else if (cameraColliderScript.currentColliderName == "SingleShroom")
+            {
+                GameObject testTriggerBlock2 = GameObject.Find("Mushroom_01");
+                ObjectSwitching objectSwitching = testTriggerBlock2.GetComponent<ObjectSwitching>();
+
+                if (currentRelmName == "Lab")
+                {
+                    objectSwitching.relmName = "Old";
+                }
+                else if (currentRelmName == "Old")
+                {
+                    objectSwitching.relmName = "Lab";
+                }
+                displayObjectsInRelm();
+            }
+            else if (cameraColliderScript.currentColliderName == "Cluster")
+            {
+                GameObject testTriggerBlock2 = GameObject.Find("ShroomCluster");
+                ObjectSwitching objectSwitching = testTriggerBlock2.GetComponent<ObjectSwitching>();
+
+                if (currentRelmName == "Lab")
+                {
+                    objectSwitching.relmName = "Old";
+                }
+                else if (currentRelmName == "Old")
+                {
+                    objectSwitching.relmName = "Lab";
+                }
+                displayObjectsInRelm();
+            }
         }
     }
 }
