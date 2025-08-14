@@ -6,7 +6,7 @@ using UnityEngine;
 public class MovingPlatform : MonoBehaviour
 {
     [Header("Path")]
-    [Tooltip("Ordered checkpoints AFTER the starting position (the platform’s initial position).")]
+    [Tooltip("Ordered checkpoints AFTER the starting position.")]
     public Transform[] checkpoints;
     public float speed = 2.5f;
     public float waitAtEndSeconds = 2f;
@@ -19,11 +19,22 @@ public class MovingPlatform : MonoBehaviour
     public float topTriggerPadding = 0.05f;
     public float topTriggerHeight = 0.2f;
 
-    [Header("Path Line (visual)")]
+    [Header("Path Line visual")]
     public bool showPathLine = true;
     public Color pathLineColor = new Color(0.15f, 0.85f, 1f, 1f);
     public float pathLineWidth = 0.03f;
     public bool pathLineAlwaysUpdateInEditor = true;
+
+    [Header("Movement Audio")]
+    [Tooltip("Looping clip that should play only while the platform is moving.")]
+    public AudioClip movementLoop;
+    [Range(0f,1f)] public float movementVolume = 0.6f;
+    [Tooltip("Meters/second above which we consider the platform 'moving'.")]
+    public float soundSpeedThreshold = 0.02f;
+    [Tooltip("If true, pitch follows current speed a bit.")]
+    public bool pitchBySpeed = true;
+    [Range(0.5f, 2f)] public float pitchMin = 0.9f;
+    [Range(0.5f, 2f)] public float pitchMax = 1.15f;
 
     Rigidbody _rb;
     BoxCollider _solid;      // non-trigger collider on THIS GameObject
@@ -38,12 +49,16 @@ public class MovingPlatform : MonoBehaviour
     readonly List<Vector3> _path = new();
     Vector3 _lastPos;
 
-    // Rider tracking (per XR rig root): contact counts to avoid “sticky” carry
+    // Rider tracking: contact counts to avoid “sticky” carry
     readonly HashSet<Transform> _riders = new();
     readonly Dictionary<Transform, int> _riderContacts = new();
 
     // Path line
     LineRenderer _pathLR;
+
+    // Audio
+    Transform _audioTf;
+    AudioSource _audio;
 
     void Reset()
     {
@@ -72,6 +87,8 @@ public class MovingPlatform : MonoBehaviour
         BuildPath();
         SetupPathLine();
 
+        EnsureMoveAudio();
+
         _lastPos = transform.position;
         _waitTimer = waitAtStartSeconds;
         _dir = 0;
@@ -89,9 +106,7 @@ public class MovingPlatform : MonoBehaviour
         if (!Application.isPlaying && autoTopTrigger) EnsureTopTrigger();
 
         BuildPath();
-
     }
-
 
     void ResolveSolidCollider()
     {
@@ -141,6 +156,7 @@ public class MovingPlatform : MonoBehaviour
             center.z
         );
     }
+
     void SetupPathLine()
     {
         if (!showPathLine)
@@ -187,6 +203,37 @@ public class MovingPlatform : MonoBehaviour
             _pathLR.SetPosition(i, _path[i]);
     }
 
+    void EnsureMoveAudio()
+    {
+        if (!Application.isPlaying) return; // create at runtime only
+
+        var t = transform.Find("__MoveAudio");
+        if (!t)
+        {
+            var go = new GameObject("__MoveAudio");
+            go.transform.SetParent(transform, false);
+            _audioTf = go.transform;
+            _audio = go.AddComponent<AudioSource>();
+        }
+        else
+        {
+            _audioTf = t;
+            _audio = t.GetComponent<AudioSource>() ?? t.gameObject.AddComponent<AudioSource>();
+        }
+
+        // Configure once
+        _audio.playOnAwake = false;
+        _audio.loop = true;
+        _audio.spatialBlend = 1f;      // 3D
+        _audio.dopplerLevel = 0f;
+        _audio.priority = 170;
+        _audio.rolloffMode = AudioRolloffMode.Linear;
+        _audio.minDistance = 1.5f;
+        _audio.maxDistance = 20f;
+        _audio.volume = movementVolume;
+        if (movementLoop) _audio.clip = movementLoop;
+    }
+
     void FixedUpdate()
     {
         // Periodically rebuild path line if checkpoints move in play mode
@@ -204,6 +251,7 @@ public class MovingPlatform : MonoBehaviour
         if (_waitTimer > 0f)
         {
             _waitTimer -= Time.fixedDeltaTime;
+            MaybePlayMoveAudio(0f); // considered stopped
             _lastPos = transform.position;
             PruneRidersIfNotOverlapping(); // extra safety during waits too
             return;
@@ -212,6 +260,7 @@ public class MovingPlatform : MonoBehaviour
         // Idle at start until ridden
         if (_dir == 0 && !_cycleActive)
         {
+            MaybePlayMoveAudio(0f); // stopped
             _lastPos = transform.position;
             PruneRidersIfNotOverlapping();
             return;
@@ -245,6 +294,7 @@ public class MovingPlatform : MonoBehaviour
 
         // Carry current riders by platform delta
         Vector3 delta = transform.position - _lastPos;
+        float speedNow = delta.magnitude / Mathf.Max(Time.fixedDeltaTime, 1e-6f);
         if (delta.sqrMagnitude > 0f && _riders.Count > 0)
         {
             foreach (var tr in _riders)
@@ -256,13 +306,43 @@ public class MovingPlatform : MonoBehaviour
             }
         }
 
+        // --- movement audio toggle/update ---
+        MaybePlayMoveAudio(speedNow);
+
         _lastPos = transform.position;
 
         // Safety: if anything slipped out of the trigger without Exit, prune it
         if (Time.frameCount % 3 == 0) PruneRidersIfNotOverlapping();
     }
 
-    // --- Trigger handling ---
+    void MaybePlayMoveAudio(float metersPerSecond)
+    {
+        if (_audio == null || movementLoop == null) return;
+
+        bool moving = metersPerSecond >= soundSpeedThreshold;
+
+        if (moving)
+        {
+            if (_audio.clip != movementLoop) _audio.clip = movementLoop;
+            _audio.volume = movementVolume;
+
+            if (pitchBySpeed)
+            {
+                // Map current speed to pitch in a soft way relative to configured path speed
+                float k = Mathf.InverseLerp(0f, Mathf.Max(0.01f, speed), metersPerSecond);
+                _audio.pitch = Mathf.Lerp(pitchMin, pitchMax, k);
+            }
+            else _audio.pitch = 1f;
+
+            if (!_audio.isPlaying) _audio.Play();
+        }
+        else
+        {
+            if (_audio.isPlaying) _audio.Stop();
+        }
+    }
+
+    // Trigger handling
 
     void OnTriggerEnter(Collider other)
     {
@@ -274,7 +354,7 @@ public class MovingPlatform : MonoBehaviour
     {
         if (_topTrigger == null || other == null) return;
 
-        // If something started inside the trigger (no Enter fired), ensure it’s tracked:
+        // If something started inside the trigger, ensure it’s tracked:
         var key = RiderKey(other.transform);
         if (key && IsAllowedTag(key) && !_riderContacts.ContainsKey(key))
             TryAddContact(other);
@@ -330,7 +410,7 @@ public class MovingPlatform : MonoBehaviour
         }
     }
 
-    // If a rider somehow didn't send Exit (disable/teleport), prune by overlap test
+    // If a rider somehow didn't send Exit, prune by overlap test
     void PruneRidersIfNotOverlapping()
     {
         if (_riders.Count == 0 || _topTrigger == null) return;
@@ -373,7 +453,7 @@ public class MovingPlatform : MonoBehaviour
         return string.IsNullOrEmpty(riderTag) || key.CompareTag(riderTag);
     }
 
-    // --- Gizmos ---
+    // Gizmos
 
     void OnDrawGizmosSelected()
     {

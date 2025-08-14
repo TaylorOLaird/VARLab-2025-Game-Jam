@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class DeathBarrier : MonoBehaviour
 {
-    [Tooltip("Tag on your XR Rig root (the object to teleport).")]
+    [Tooltip("XR Rig tag.")]
     public string playerTag = "Player";
 
     Rigidbody _rb;
@@ -39,14 +39,14 @@ public class DeathBarrier : MonoBehaviour
     {
         if (other == null) return;
 
-        // 🔒 Only kill the player-tagged rig
+        // Only kill the player-tagged rig
         var root = other.transform.root;
         if (!root.CompareTag(playerTag)) return;
 
         var lm = LevelManager.Instance;
         if (lm != null && !lm.IsRespawning)
         {
-            lm.KillPlayer(root); // LevelManager will re-validate this root too
+            lm.KillPlayer(root);
         }
     }
 

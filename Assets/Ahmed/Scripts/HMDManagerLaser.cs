@@ -10,15 +10,15 @@ public class HMDManagerLaser : MonoBehaviour
     public static HMDManagerLaser Instance { get; private set; }
 
     [Header("Face Hitboxes")]
-    public GameObject HMDDoffHitbox; // has XRGrabInteractable
-    public GameObject HMDDonHitbox;  // usually an XRSocketInteractor visual/anchor
+    public GameObject HMDDoffHitbox;
+    public GameObject HMDDonHitbox;
 
     [Header("XR")]
-    public XRSocketInteractor socketInteractor;      // face socket
-    public XRGrabInteractable  grabInteractable;     // doff handle/button on face
+    public XRSocketInteractor socketInteractor;
+    public XRGrabInteractable grabInteractable;
 
     [Header("State (debug)")]
-    public Stack<HMD> HMDStack = new Stack<HMD>();   // bottom..top (top = currently worn)
+    public Stack<HMD> HMDStack = new Stack<HMD>();   // top = currently worn
     public HMD currentlyWorn;                        // null if none
 
     public SceneSwitcher sceneSwitcher;
@@ -46,7 +46,6 @@ public class HMDManagerLaser : MonoBehaviour
 
     void Start()
     {
-        // cache every HMD in the scene (for reset)
         _allHMDs.AddRange(FindObjectsOfType<HMD>(true));
 
         // initial attach of face hitboxes
@@ -56,11 +55,10 @@ public class HMDManagerLaser : MonoBehaviour
 
     void Update()
     {
-        // Keep the face hitboxes glued to the current main camera and facing forward.
-        // (Main camera can change after XR init / scene loads / device recenter.)
+        // Keep the face hitboxes glued to the current main camera and facing forward
         if (Camera.main != _cachedMainCam ||
             (HMDDoffHitbox && HMDDoffHitbox.transform.parent != Camera.main?.transform) ||
-            (HMDDonHitbox  && HMDDonHitbox.transform.parent  != Camera.main?.transform))
+            (HMDDonHitbox && HMDDonHitbox.transform.parent != Camera.main?.transform))
         {
             AttachFaceHitboxesToCamera();
         }
@@ -69,7 +67,6 @@ public class HMDManagerLaser : MonoBehaviour
         SelfHealDoffHandle();
     }
 
-    // --- Wear flow ---
     void DonWaitAndProcess(SelectEnterEventArgs args) => StartCoroutine(DelayedHeadsetDon(args));
 
     IEnumerator DelayedHeadsetDon(SelectEnterEventArgs args)
@@ -80,11 +77,11 @@ public class HMDManagerLaser : MonoBehaviour
 
     void ProcessHeadsetDon(SelectEnterEventArgs args)
     {
-        var go  = args.interactableObject.transform.gameObject;
+        var go = args.interactableObject.transform.gameObject;
         var hmd = go.GetComponent<HMD>();
         if (!hmd) { Debug.LogWarning("Slotted object has no HMD component."); return; }
 
-        // Special “end” headset?
+        // End headset?
         if (go.name.Equals("EndHeadset"))
         {
             EventManager.RoomNumber = 2;
@@ -115,7 +112,6 @@ public class HMDManagerLaser : MonoBehaviour
         HMDStack.Push(hmd);
         currentlyWorn = hmd;
 
-        // UI event
         EventManager.HeadsetDon(hmd);
 
         // Apply top-of-stack color suppression
@@ -130,29 +126,27 @@ public class HMDManagerLaser : MonoBehaviour
             return;
         }
 
-        // Pop the top (currently worn)
+        // Pop the top
         var hmd = HMDStack.Pop();
         var headsetGO = hmd.gameObject;
 
-        // Reactivate physical object
+        // Reactivate
         headsetGO.SetActive(true);
 
         // UI event for removing the icon
         EventManager.HeadsetDoff(hmd);
 
-        // Hand it to the grabbing hand
         var handBase = args.interactorObject as XRBaseInteractor;
         if (handBase != null)
         {
-            var manager       = handBase.interactionManager;
-            var grabbable     = headsetGO.GetComponent<XRGrabInteractable>();
+            var manager = handBase.interactionManager;
+            var grabbable = headsetGO.GetComponent<XRGrabInteractable>();
             var selInteractor = args.interactorObject as IXRSelectInteractor
                                 ?? handBase as IXRSelectInteractor
                                 ?? handBase.GetComponent<IXRSelectInteractor>();
 
             if (manager != null && selInteractor != null && grabbable != null)
             {
-                // ⬇️ IMPORTANT: drop whatever the hand currently holds, THEN grab the headset
                 if (handBase.hasSelection)
                     manager.SelectExit(handBase, handBase.firstInteractableSelected);
 
@@ -179,11 +173,10 @@ public class HMDManagerLaser : MonoBehaviour
         else
         {
             currentlyWorn = null;
-            ApplyLaserSuppression(null);                  // no suppression
+            ApplyLaserSuppression(null);
         }
     }
 
-    // --- Face hitbox helpers ---
     void AttachFaceHitboxesToCamera()
     {
         _cachedMainCam = Camera.main;
@@ -191,7 +184,7 @@ public class HMDManagerLaser : MonoBehaviour
         if (!cam) return;
 
         if (HMDDoffHitbox) { HMDDoffHitbox.transform.SetParent(cam.transform, false); HMDDoffHitbox.transform.localPosition = Vector3.zero; }
-        if (HMDDonHitbox)  { HMDDonHitbox.transform.SetParent(cam.transform, false);  HMDDonHitbox .transform.localPosition = Vector3.zero; }
+        if (HMDDonHitbox) { HMDDonHitbox.transform.SetParent(cam.transform, false); HMDDonHitbox.transform.localPosition = Vector3.zero; }
     }
 
     void NudgeFaceHitboxes()
@@ -215,7 +208,7 @@ public class HMDManagerLaser : MonoBehaviour
 
     void SelfHealDoffHandle()
     {
-        // If something disabled the doff handle’s collider or interactable, turn them back on.
+        // If something disabled the doff handle’s collider or interactable, turn them back on
         if (!grabInteractable) return;
 
         if (!grabInteractable.enabled) grabInteractable.enabled = true;
@@ -233,8 +226,6 @@ public class HMDManagerLaser : MonoBehaviour
         }
     }
 
-    // --- Global helpers ---
-
     // Suppress all lasers of a color; null = show everything
     public static void ApplyLaserSuppression(LaserEmitter.LaserType? colorOrNull)
     {
@@ -245,7 +236,7 @@ public class HMDManagerLaser : MonoBehaviour
     // Called by LevelManager on death
     public void ResetHeadsetsToSpawn()
     {
-        // 1) Clear face socket (if anything is slotted)
+        // Clear face socket
         if (socketInteractor && socketInteractor.hasSelection)
         {
             var sel = socketInteractor.firstInteractableSelected;
@@ -253,19 +244,42 @@ public class HMDManagerLaser : MonoBehaviour
                 socketInteractor.interactionManager.SelectExit(socketInteractor, sel);
         }
 
-        // 2) Show all HMDs at their original locations
+        // Show all HMDs at their original locations
         foreach (var h in _allHMDs)
             if (h) h.ResetToSpawn();
 
-        // 3) Clear local state
+        // Clear local state
         HMDStack.Clear();
         currentlyWorn = null;
 
-        // 4) Show all lasers again
+        // Show all lasers again
         ApplyLaserSuppression(null);
 
-        // 5) Reattach face hitboxes (camera can change on respawn)
+        // Reattach face hitboxes
         AttachFaceHitboxesToCamera();
         NudgeFaceHitboxes();
+    }
+    
+    public void RespawnHMD(HMD hmd)
+    {
+        if (!hmd) return;
+
+        // If this HMD is currently worn/inactive, it's not the one that fell—ignore.
+        if (currentlyWorn == hmd || !hmd.gameObject.activeInHierarchy)
+            return;
+
+        // If some interactor is still selecting it, force release (ResetToSpawn also does this,
+        // but calling here first avoids transient states).
+        var grab = hmd.GetComponent<XRGrabInteractable>();
+        if (grab && grab.isSelected && grab.interactionManager != null)
+        {
+            var mgr = grab.interactionManager;
+            var selecting = new List<IXRSelectInteractor>(grab.interactorsSelecting);
+            foreach (var interactor in selecting)
+                mgr.SelectExit(interactor, grab);
+        }
+
+        // Reset transform/velocities/parent and reactivate
+        hmd.ResetToSpawn();
     }
 }

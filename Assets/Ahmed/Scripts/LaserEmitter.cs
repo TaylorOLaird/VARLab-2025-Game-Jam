@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
-[RequireComponent(typeof(Rigidbody))] // needed so the child trigger fires reliably
+[RequireComponent(typeof(Rigidbody))]
 public class LaserEmitter : MonoBehaviour
 {
     public enum LaserType { Red, Green, Blue }
@@ -13,13 +13,12 @@ public class LaserEmitter : MonoBehaviour
     public LayerMask hitMask = ~0;
 
     [Header("Beam Renderers (URP/Unlit Additive)")]
-    public LineRenderer coreLR; // beam_core.png, Transparent+Additive
-    public LineRenderer glowLR; // beam_glow.png, Transparent+Additive
+    public LineRenderer coreLR;
+    public LineRenderer glowLR;
 
-    [Header("Ring Identification (no Renderer ref needed)")]
-    [Tooltip("Assign the ring material asset used by the ring submesh in the FBX. Emission should be enabled on this asset.")]
+    [Header("Ring Identification")]
+    [Tooltip("Assign the ring material asset used by the ring submesh.")]
     public Material ringMaterialAsset;
-    [Tooltip("If ringMaterialAsset is not assigned, we'll match by material name containing this text.")]
     public string ringMaterialNameContains = "Ring";
 
     [Header("Look")]
@@ -32,7 +31,7 @@ public class LaserEmitter : MonoBehaviour
     public float scrollSpeed = 3f;
     public float tilesPerMeter = 4f;
 
-    [Header("Impact (optional)")]
+    [Header("Impact")]
     public Transform impactDecal;
     public ParticleSystem impactParticles;
 
@@ -42,7 +41,7 @@ public class LaserEmitter : MonoBehaviour
     public string playerTag = "Player";
 
     [Header("Audio")]
-    [Tooltip("Looping hum .wav (set to Loop in importer).")]
+    [Tooltip("Looping hum.")]
     public AudioClip humLoop;
     [Tooltip("If assigned, used as player head.")]
     public Transform playerHead;
@@ -66,7 +65,6 @@ public class LaserEmitter : MonoBehaviour
     Vector3 _start, _end;
     LaserType _lastAppliedLaser;
 
-    // physics + trigger
     Rigidbody _rb;
     Transform _beamTriggerTf;
     BoxCollider _beamTrigger;
@@ -100,7 +98,7 @@ public class LaserEmitter : MonoBehaviour
 
     void OnValidate()
     {
-        // Editor-only: never create/destroy components here.
+        // Editor-only
         Ensure(false);
         CacheRingSlots();
         UpdateAll(true);
@@ -157,42 +155,7 @@ public class LaserEmitter : MonoBehaviour
         if (_beamTrigger) _beamTrigger.isTrigger = true;
     }
 
-    void EnsureBeamAudio(bool allowCreate)
-    {
-        if (_beamAudioTf == null)
-        {
-            var t = transform.Find("__BeamAudio");
-            if (!t)
-            {
-                if (!allowCreate) { _beamAudioTf = null; _beamAudio = null; return; }
-                var go = new GameObject("__BeamAudio");
-                go.layer = gameObject.layer;
-                go.transform.SetParent(transform, false);
-                _beamAudioTf = go.transform;
-                _beamAudio = go.AddComponent<AudioSource>();
-            }
-            else
-            {
-                _beamAudioTf = t;
-                _beamAudio = _beamAudioTf.GetComponent<AudioSource>();
-                if (_beamAudio == null && allowCreate) _beamAudio = _beamAudioTf.gameObject.AddComponent<AudioSource>();
-            }
-        }
-
-        if (_beamAudio == null) return;
-
-        _beamAudio.playOnAwake = false;
-        _beamAudio.loop = true;
-        _beamAudio.spatialBlend = 1f;
-        _beamAudio.dopplerLevel = 0f;
-        _beamAudio.spread = 0f;
-        _beamAudio.priority = 160;
-        _beamAudio.rolloffMode = AudioRolloffMode.Custom;
-        var flat = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 1f));
-        _beamAudio.SetCustomCurve(AudioSourceCurveType.CustomRolloff, flat);
-
-        if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
-    }
+    
 
     public void SetSuppressed(bool value)
     {
@@ -300,7 +263,7 @@ public class LaserEmitter : MonoBehaviour
             _lastAppliedLaser = laser;
         }
 
-        // Editor preview: visuals only; no trigger/audio churn.
+        // Editor preview: visuals only
         if (!Application.isPlaying)
         {
             if (_beamTrigger) _beamTrigger.enabled = false;
@@ -357,10 +320,10 @@ public class LaserEmitter : MonoBehaviour
         }
     }
 
-    // --- LETHAL TRIGGER ---
+    // LETHAL TRIGGER
     void UpdateBeamTrigger(Vector3 a, Vector3 b, float radius)
     {
-        // Create/find at runtime only.
+        // Create/find at runtime only
         EnsureBeamTrigger(Application.isPlaying);
         if (!_beamTriggerTf || !_beamTrigger) return;
 
@@ -379,7 +342,7 @@ public class LaserEmitter : MonoBehaviour
         _beamTrigger.center = Vector3.zero;
     }
 
-    // Receive trigger callbacks on the parent Rigidbody (no child relay script needed)
+    // Receive trigger callbacks on the parent Rigidbody
     void OnTriggerEnter(Collider other)  => OnBeamTriggerTouched(other);
     void OnTriggerStay(Collider other)   => OnBeamTriggerTouched(other);
 
@@ -407,37 +370,97 @@ public class LaserEmitter : MonoBehaviour
 
     public void SetLaser(LaserType t) { laser = t; UpdateAll(true); }
 
-    void UpdateHumAudio(Vector3 a, Vector3 b)
+    // Replace your EnsureBeamAudio(...) with this:
+void EnsureBeamAudio(bool allowCreate)
+{
+    if (_beamAudioTf == null)
     {
-        EnsureBeamAudio(true); // runtime only
-        if (_beamAudio == null) return;
-
-        if (humLoop == null || humMaxDistance <= 0f)
+        var t = transform.Find("__BeamAudio");
+        if (!t)
         {
-            if (_beamAudio.isPlaying) _beamAudio.Stop();
-            return;
+            if (!allowCreate) { _beamAudioTf = null; _beamAudio = null; return; }
+            var go = new GameObject("__BeamAudio");
+            go.layer = gameObject.layer;
+            go.transform.SetParent(transform, false);
+            _beamAudioTf = go.transform;
+            _beamAudio = go.AddComponent<AudioSource>();
         }
-        if (playerHead == null)
+        else
         {
-            if (_beamAudio.isPlaying) _beamAudio.Stop();
-            return;
+            _beamAudioTf = t;
+            _beamAudio = _beamAudioTf.GetComponent<AudioSource>();
+            if (_beamAudio == null && allowCreate) _beamAudio = _beamAudioTf.gameObject.AddComponent<AudioSource>();
         }
-
-        Vector3 ab = b - a;
-        float abLenSq = Mathf.Max(1e-6f, ab.sqrMagnitude);
-        float t = Vector3.Dot(playerHead.position - a, ab) / abLenSq;
-        t = Mathf.Clamp01(t);
-        Vector3 closest = a + ab * t;
-
-        if (humFollowSmoothing <= 0f) _beamAudioTf.position = closest;
-        else _beamAudioTf.position = Vector3.Lerp(_beamAudioTf.position, closest, 1f - Mathf.Pow(1f - humFollowSmoothing, Time.deltaTime * 60f));
-
-        float d = Vector3.Distance(playerHead.position, closest);
-        float k = Mathf.InverseLerp(humMaxDistance, humNearDistance, d); // 0 far, 1 near
-        float vol = Mathf.Lerp(humBaseVolume, humNearVolume, k);
-        _beamAudio.volume = vol;
-
-        if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
-        if (!_beamAudio.isPlaying) _beamAudio.Play();
     }
+
+    if (_beamAudio == null) return;
+
+    // 3D setup
+    _beamAudio.playOnAwake = false;
+    _beamAudio.loop        = true;
+    _beamAudio.spatialBlend = 1f;
+    _beamAudio.dopplerLevel = 0f;
+    _beamAudio.spread       = 0f;
+    _beamAudio.priority     = 160;
+
+    // ✅ Use Unity distance attenuation instead of a flat custom curve
+    _beamAudio.rolloffMode = AudioRolloffMode.Linear;
+
+    // Keep min < max; if user sets bad values, fix them up
+    float min = Mathf.Max(0.01f, humNearDistance);
+    float max = Mathf.Max(min + 0.01f, humMaxDistance);
+    _beamAudio.minDistance = min;
+    _beamAudio.maxDistance = max;
+
+    if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
+}
+
+// Replace your UpdateHumAudio(...) with this:
+void UpdateHumAudio(Vector3 a, Vector3 b)
+{
+    EnsureBeamAudio(true);
+    if (_beamAudio == null) return;
+
+    // no audio to play or no listener → silent
+    if (humLoop == null || humMaxDistance <= 0f || playerHead == null)
+    {
+        if (_beamAudio.isPlaying) _beamAudio.Stop();
+        return;
+    }
+
+    // Closest point on the beam segment to head
+    Vector3 ab = b - a;
+    float    abLenSq = Mathf.Max(1e-6f, ab.sqrMagnitude);
+    float    t = Mathf.Clamp01(Vector3.Dot(playerHead.position - a, ab) / abLenSq);
+    Vector3  closest = a + ab * t;
+
+    // Follow closest point (for good panning)
+    if (humFollowSmoothing <= 0f) _beamAudioTf.position = closest;
+    else
+        _beamAudioTf.position = Vector3.Lerp(
+            _beamAudioTf.position, closest,
+            1f - Mathf.Pow(1f - humFollowSmoothing, Time.deltaTime * 60f)
+        );
+
+    // Distance-based volume shaping (on top of Unity's rolloff)
+    float d = Vector3.Distance(playerHead.position, closest);
+
+    // Hard clamp to 0 beyond MaxDistance so they’re truly silent far away
+    if (d >= humMaxDistance)
+    {
+        _beamAudio.volume = 0f;
+        if (_beamAudio.isPlaying) _beamAudio.Pause(); // optional: save CPU
+        return;
+    }
+
+    // Smooth fade from far→near
+    float k   = Mathf.InverseLerp(humMaxDistance, humNearDistance, d); // 0 at max, 1 near
+    float vol = Mathf.Lerp(humBaseVolume, humNearVolume, k);
+    _beamAudio.volume = Mathf.Clamp01(vol);
+
+    if (_beamAudio.clip != humLoop) _beamAudio.clip = humLoop;
+    if (!_beamAudio.isPlaying) _beamAudio.UnPause(); // resume if it was paused
+    if (!_beamAudio.isPlaying) _beamAudio.Play();
+}
+
 }

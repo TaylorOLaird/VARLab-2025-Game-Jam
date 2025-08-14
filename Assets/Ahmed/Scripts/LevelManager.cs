@@ -22,14 +22,14 @@ public class LevelManager : MonoBehaviour
     public float redFlashOut  = 0.12f;
     public ParticleSystem deathExplosionPrefab;
 
-    [Header("XR Camera (for overlays)")]
-    public Camera xrCamera; // assign your XR camera; if null, uses Camera.main
+    [Header("XR Camera ")]
+    public Camera xrCamera;
 
-    [Header("Player (optional override)")]
+    [Header("Player")]
     public Transform playerRootOverride;
     public string playerTag = "Player";
 
-    [Header("Respawn Safety (no bounds collider)")]
+    [Header("Respawn Safety")]
     [Tooltip("Layers considered solid ground when snapping the player to the floor at respawn.")]
     public LayerMask groundMask = ~0;
     [Tooltip("Start the ground probe this far above the spawn point.")]
@@ -38,7 +38,7 @@ public class LevelManager : MonoBehaviour
     public float groundProbeDown = 6f;
     [Tooltip("Small clearance above the floor so the capsule bottom doesn’t clip.")]
     public float groundClearance = 0.02f;
-    [Tooltip("Extra settle time (physics frames) before we fade back in.")]
+    [Tooltip("Extra settle time before we fade back in.")]
     public int settleFixedFrames = 2;
 
     Canvas _canvas;
@@ -142,10 +142,10 @@ public class LevelManager : MonoBehaviour
         yield return StartCoroutine(FadeTo(_black, 1f, blackFadeIn));
         yield return new WaitForSeconds(blackHold + Mathf.Max(0f, blackHoldExtra));
 
-        // Reset puzzle items (headsets etc.)
+        // Reset puzzle items
         if (HMDManagerLaser.Instance) HMDManagerLaser.Instance.ResetHeadsetsToSpawn();
 
-        // Clear any floating-menu headset stacks (if you added ClearHeadsetUI)
+        // Clear any floating-menu headset stacks
         ClearAllHeadsetUIStacks();
 
         // Freeze ALL rigidbodies under the rig so we don't carry velocity
@@ -173,24 +173,24 @@ public class LevelManager : MonoBehaviour
         foreach (var m in menus)
         {
             if (!m) continue;
-            try { m.ClearHeadsetUI(); } catch { /* optional */ }
+            try { m.ClearHeadsetUI(); } catch {}
         }
     }
 
     IEnumerator SafePlaceRig(Transform rigRoot)
     {
-        // Find any CC under the rig (typical XR Origin has it on the root; but we support child too)
+        // Find any CC under the rig
         var cc = rigRoot.GetComponentInChildren<CharacterController>(true);
 
         // Disable any CCs under rig so teleports don't collide mid-move
         var allCCs = rigRoot.GetComponentsInChildren<CharacterController>(true);
         foreach (var c in allCCs) c.enabled = false;
 
-        // Step 1: place rig root at spawn yaw/pos
+        // Place rig root at spawn yaw/pos
         Quaternion targetYaw = Quaternion.Euler(0f, respawnPoint.eulerAngles.y, 0f);
         rigRoot.SetPositionAndRotation(respawnPoint.position, targetYaw);
 
-        // Step 2: find floor under spawn
+        // Find floor under spawn
         float startY = respawnPoint.position.y + groundProbeUp;
         Vector3 probeStart = new Vector3(respawnPoint.position.x, startY, respawnPoint.position.z);
         float maxDist = groundProbeUp + groundProbeDown;
@@ -200,7 +200,7 @@ public class LevelManager : MonoBehaviour
         else
             floorY = respawnPoint.position.y; // fallback
 
-        // Step 3: vertically correct so CC bottom rests at floor+clearance, using actual transformed center
+        // Vertically correct so CC bottom rests at floor+clearance, using actual transformed center
         if (cc)
         {
             float halfHeight = Mathf.Max(cc.height * 0.5f, cc.radius);
@@ -259,7 +259,7 @@ public class LevelManager : MonoBehaviour
         return false;
     }
 
-    // --- Hard-freeze/unfreeze ALL rigidbodies under the player root during respawn ---
+    // Hard-freeze/unfreeze ALL rigidbodies under the player root during respawn
     struct RBState
     {
         public Rigidbody rb;
@@ -313,7 +313,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // --- UI helpers ---
+    // UI helpers
     IEnumerator FadeTo(Image img, float targetA, float duration)
     {
         float startA = img.color.a;

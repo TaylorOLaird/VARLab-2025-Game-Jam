@@ -8,13 +8,13 @@ using UnityEngine.UI;
 public class EndHallwayTrigger : MonoBehaviour
 {
     [Header("Detection")]
-    [Tooltip("Tag on the XR Rig root (the object that represents the player).")]
+    [Tooltip("Tag on the XR Rig root.")]
     public string playerTag = "Player";
 
     [Header("Fade & Load")]
-    [Tooltip("Your XR camera. Used to render the full-screen fade in VR.")]
+    [Tooltip("The XR camera.")]
     public Camera xrCamera;
-    [Tooltip("Scene name to load. Leave empty if using Build Index.")]
+    [Tooltip("Scene name to load")]
     public string sceneName;
     [Tooltip("Optional alternative to Scene Name.")]
     public int sceneBuildIndex = -1;
@@ -79,7 +79,7 @@ public class EndHallwayTrigger : MonoBehaviour
         // Fade to black
         yield return StartCoroutine(FadeTo(_black, 1f, fadeOutDuration));
 
-        // Optional hold
+        // Hold
         if (blackHold > 0f) yield return new WaitForSeconds(blackHold);
 
         // Load next scene
@@ -108,7 +108,7 @@ public class EndHallwayTrigger : MonoBehaviour
         _canvas.sortingOrder = 10000;    // on top of everything
         _canvas.gameObject.AddComponent<CanvasScaler>();
         _canvas.gameObject.AddComponent<GraphicRaycaster>();
-        DontDestroyOnLoad(_canvas.gameObject); // survives scene load if you later want to fade back in
+        DontDestroyOnLoad(_canvas.gameObject);
 
         // Fullscreen black image
         var go = new GameObject("Black");

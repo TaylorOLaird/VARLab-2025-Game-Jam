@@ -15,7 +15,7 @@ public class MovingBlock : MonoBehaviour
     public float amplitude = 3f;
     [Tooltip("Cycles per second.")]
     public float frequency = 0.25f;
-    [Tooltip("Phase offset in degrees (useful to stagger multiple blocks).")]
+    [Tooltip("Phase offset in degrees.")]
     public float phaseDegrees = 0f;
 
     [Header("Center")]
@@ -32,7 +32,7 @@ public class MovingBlock : MonoBehaviour
         bc.isTrigger = false;                 // must be solid to block lasers
 
         var rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true;                // driven by script
+        rb.isKinematic = true;
         rb.useGravity = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
@@ -76,7 +76,6 @@ public class MovingBlock : MonoBehaviour
 
         Vector3 target = pathCenter + dir * (amplitude * Mathf.Sin(omega * (float)t + phase));
         _rb.MovePosition(target);
-        // No rotation change; it just slides.
     }
 
     // Editor helper to set a new path center at current position

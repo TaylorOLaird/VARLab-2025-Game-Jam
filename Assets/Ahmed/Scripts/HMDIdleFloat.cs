@@ -50,7 +50,7 @@ public class HMDIdleFloat : MonoBehaviour
             _grab.selectExited.AddListener(OnSelectExited);
         }
 
-        // If we queued a return while inactive, do it now (only if not held)
+        // If we queued a return while inactive, do it now
         if (_pendingReturn && _grab != null && !_grab.isSelected)
         {
             _pendingReturn = false;
@@ -110,14 +110,14 @@ public class HMDIdleFloat : MonoBehaviour
 
     void OnSelectExited(SelectExitEventArgs _)
     {
-        // If we're being turned off (e.g., hidden when worn), don't start coroutines now
+        // If we're being turned off, don't start coroutines now
         if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
         {
             _pendingReturn = true; // run when re-enabled
             return;
         }
 
-        // Ensure physics won't fight the return:
+        // Ensure physics won't fight the return
         if (_rb)
         {
             if (!_rb.isKinematic)
